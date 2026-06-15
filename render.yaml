@@ -4,7 +4,7 @@ services:
   - type: web
     name: exam-bank
     runtime: python
-    plan: starter  # starter 支持持久化磁盘；如用 free plan 数据重启后丢失
+    plan: free
     buildCommand: pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
     startCommand: gunicorn -w 2 -k gthread --threads 4 -b 0.0.0.0:$PORT --timeout 120 app:app
     envVars:
@@ -16,10 +16,7 @@ services:
         value: "3.11.6"
       - key: RENDER_DATA_DIR
         value: /opt/render/project/data
-    disk:
-      name: exam-data
-      mountPath: /opt/render/project/data
-      sizeGB: 1
+
     healthCheckPath: /
     autoDeploy: true  # 推送 GitHub 自动部署
 
