@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>中考英语真题题库</title>
+<link rel="stylesheet" href="https://unpkg.com/element-plus@2.4.4/dist/index.css">
+<script src="https://unpkg.com/vue@3.3.8/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/element-plus@2.4.4/dist/index.full.min.js"></script>
+<script src="https://unpkg.com/@element-plus/icons-vue@2.1.0/dist/index.iife.min.js"></script>
+<script src="https://unpkg.com/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  :root {
+    --student-primary: #4f7cff;
+    --student-bg: #f4f7fb;
+    --teacher-primary: #6c5ce7;
+    --teacher-bg: #f5f3ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text-main: #1f2937;
+    --text-sub: #6b7280;
+    --border: #e5e7eb;
+    --card-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    --card-shadow-hover: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body, #app { height: 100%; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--student-bg);
+    color: var(--text-main);
+    font-size: 14px;
+  }
+  body.teacher-mode { background: var(--teacher-bg); }
+
+  /* 顶部导航 */
+  .topbar {
+    height: 56px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;
+    background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .topbar .logo { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; }
+  .topbar .logo .logo-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--student-primary), #7c3aed);
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: 800;
+  }
+  body.teacher-mode .topbar .logo .logo-icon { background: linear-gradient(135deg, var(--teacher-primary), #ec4899); }
+  .topbar .user-info { display: flex; align-items: center; gap: 14px; }
+  .topbar .user-info .name { font-weight: 600; }
+  .topbar .user-info .role-tag { font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+  .topbar .user-info .role-tag.student { background: #dbeafe; color: #1d4ed8; }
+  .topbar .user-info .role-tag.teacher { background: #ede9fe; color: #6d28d9; }
+  .topbar .user-info .role-tag.admin { background: #fee2e2; color: #b91c1c; }
+
+  /* 主体布局 */
+  .main { display: flex; height: calc(100vh - 56px); }
+  .sidebar {
+    width: 220px; background: #fff; border-right: 1px solid var(--border);
+    padding: 16px 12px; overflow-y: auto; flex-shrink: 0;
+  }
+  .sidebar .menu-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border-radius: 8px; cursor: pointer; margin-bottom: 4px;
+    color: var(--text-sub); transition: all 0.2s;
+  }
+  .sidebar .menu-item:hover { background: #f3f4f6; color: var(--text-main); }
+  .sidebar .menu-item.active {
+    background: var(--student-primary); color: #fff; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(79, 124, 255, 0.3);
+  }
+  body.teacher-mode .sidebar .menu-item.active {
+    background: var(--teacher-primary);
+    box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+  }
+  .sidebar .menu-item .icon { font-size: 18px; width: 20px; text-align: center; }
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* 卡片 */
+  .card {
+    background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    box-shadow: var(--card-shadow);
+  }
+  .card-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title .left { display: flex; align-items: center; gap: 8px; }
+  .card-title .left::before {
+    content: ''; display: inline-block; width: 4px; height: 16px;
+    background: var(--student-primary); border-radius: 2px;
+  }
+  body.teacher-mode .card-title .left::before { background: var(--teacher-primary); }
+
+  /* 数据卡片 */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .stat-card {
+    background: #fff; border-radius: 12px; padding: 18px; position: relative; overflow: hidden;
+    box-shadow: var(--card-shadow); transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow-hover); }
+  .stat-card .label { font-size: 13px; color: var(--text-sub); margin-bottom: 8px; }
+  .stat-card .value { font-size: 28px; font-weight: 800; color: var(--text-main); }
+  .stat-card .icon-bg {
+    position: absolute; right: 12px; top: 12px; width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff;
+  }
+  .stat-card.primary .icon-bg { background: linear-gradient(135deg, #4f7cff, #7c3aed); }
+  .stat-card.success .icon-bg { background: linear-gradient(135deg, #10b981, #059669); }
+  .stat-card.warning .icon-bg { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .stat-card.danger .icon-bg { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  .stat-card.info .icon-bg { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+
+  /* 欢迎区 */
+  .welcome {
+    background: linear-gradient(135deg, var(--student-primary), #7c3aed);
+    color: #fff; padding: 24px; border-radius: 12px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  body.teacher-mode .welcome { background: linear-gradient(135deg, var(--teacher-primary), #ec4899); }
+  .welcome h2 { margin: 0 0 4px; font-size: 22px; }
+  .welcome p { margin: 0; opacity: 0.9; }
+  .welcome .avatar { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; }
+
+  /* 快捷入口 */
+  .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .quick-item {
+    background: #fff; border-radius: 10px; padding: 18px 12px; text-align: center; cursor: pointer;
+    border: 1px solid var(--border); transition: all 0.2s;
+  }
+  .quick-item:hover { transform: translateY(-2px); box-shadow: var(--card-shadow-hover); border-color: var(--student-primary); }
+  body.teacher-mode .quick-item:hover { border-color: var(--teacher-primary); }
+  .quick-item .qi-icon {
+    width: 44px; height: 44px; border-radius: 10px; margin: 0 auto 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff;
+  }
+  .quick-item .qi-name { font-weight: 600; }
+  .quick-item .qi-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+  /* 图表容器 */
+  .chart-box { width: 100%; height: 280px; }
+
+  /* 登录页 */
+  .login-page {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+  }
+  .login-card {
+    background: #fff; border-radius: 16px; padding: 36px 32px; width: 100%; max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .login-title { text-align: center; margin-bottom: 24px; }
+  .login-title h1 { font-size: 24px; margin: 0 0 8px; background: linear-gradient(135deg, #4f7cff, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .login-title p { color: var(--text-sub); margin: 0; font-size: 13px; }
+  .role-tabs { display: flex; background: #f3f4f6; border-radius: 10px; padding: 4px; margin-bottom: 24px; }
+  .role-tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-sub); transition: all 0.2s; }
+  .role-tab.active { background: #fff; color: var(--student-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .role-tab.active.teacher { color: var(--teacher-primary); }
+
+  /* 题卡 */
+  .question-card { background: #fff; border-radius: 12px; padding: 24px; }
+  .qtype-tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; background: #dbeafe; color: #1d4ed8; margin-right: 8px; }
+  .qtype-tag.完形填空 { background: #fef3c7; color: #b45309; }
+  .qtype-tag.选词填空 { background: #fce7f3; color: #be185d; }
+  .qtype-tag.阅读理解 { background: #d1fae5; color: #065f46; }
+  .qtype-tag.翻译 { background: #ede9fe; color: #6d28d9; }
+  .qtype-tag.作文 { background: #fee2e2; color: #b91c1c; }
+  .qtype-tag.多选 { background: #cffafe; color: #0e7490; }
+  .stem { font-size: 16px; line-height: 1.7; margin: 16px 0; white-space: pre-wrap; }
+  .opt-item {
+    display: flex; align-items: flex-start; padding: 12px 16px; border: 1.5px solid var(--border);
+    border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; background: #fff;
+  }
+  .opt-item:hover { border-color: var(--student-primary); background: #f0f5ff; }
+  .opt-item.selected { border-color: var(--student-primary); background: #eef4ff; font-weight: 600; }
+  .opt-item .label { font-weight: 700; margin-right: 10px; min-width: 24px; }
+  .opt-item.correct { border-color: var(--success); background: #f0fdf4; }
+  .opt-item.wrong { border-color: var(--danger); background: #fef2f2; }
+
+  .answer-area {
+    background: #f9fafb; border-radius: 8px; padding: 16px; margin-top: 16px;
+    border-left: 4px solid var(--student-primary);
+  }
+  body.teacher-mode .answer-area { border-left-color: var(--teacher-primary); }
+  .answer-area .label { font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
+  .answer-area .correct-answer { color: var(--success); font-weight: 600; }
+  .answer-area .user-answer { color: var(--danger); }
+  .answer-area .analysis { color: var(--text-sub); margin-top: 8px; line-height: 1.6; }
+
+  /* 移动端适配 */
+  @media (max-width: 768px) {
+    .main { flex-direction: column; height: calc(100vh - 56px - 60px); }
+    .sidebar { display: none; }
+    .sidebar.mobile-show { display: block; position: fixed; top: 56px; left: 0; bottom: 60px; width: 240px; z-index: 99; box-shadow: 4px 0 12px rgba(0,0,0,0.1); }
+    .content { padding: 12px; padding-bottom: 80px; }
+    .topbar { padding: 0 12px; }
+    .topbar .user-info .name, .topbar .user-info .role-tag { display: none; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-card { padding: 14px; }
+    .stat-card .value { font-size: 22px; }
+    .welcome { padding: 16px; }
+    .welcome h2 { font-size: 18px; }
+    .welcome .avatar { width: 48px; height: 48px; font-size: 24px; }
+    .card { padding: 14px; }
+    .chart-box { height: 220px; }
+    .mobile-tabbar {
+      display: flex !important; position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+      background: #fff; border-top: 1px solid var(--border); z-index: 90;
+    }
+    .mobile-tabbar .tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; font-size: 11px; color: var(--text-sub); cursor: pointer;
+    }
+    .mobile-tabbar .tab.active { color: var(--student-primary); }
+    body.teacher-mode .mobile-tabbar .tab.active { color: var(--teacher-primary); }
+    .mobile-tabbar .tab .ti { font-size: 22px; }
+    .mobile-menu-btn { display: inline-flex !important; align-items: center; padding: 8px; }
+    .login-card { padding: 24px 20px; }
+    .question-card { padding: 16px; }
+  }
+  .mobile-tabbar { display: none; }
+  .mobile-menu-btn { display: none; }
+
+  /* 工具类 */
+  .flex { display: flex; }
+  .flex-1 { flex: 1; }
+  .text-sub { color: var(--text-sub); }
+  .text-success { color: var(--success); }
+  .text-danger { color: var(--danger); }
+  .mb-12 { margin-bottom: 12px; }
+  .mb-16 { margin-bottom: 16px; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .right { text-align: right; }
+  .small { font-size: 12px; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { background: #eef2ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+
+  .table-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .table-toolbar .el-input { width: 200px; }
+  .table-toolbar .el-select { width: 150px; }
+
+  .empty { text-align: center; padding: 60px 0; color: var(--text-sub); }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <login-page v-if="!token" :role="loginRole" @login="onLogin" @switch-role="loginRole = $event"></login-page>
+  <template v-else>
+    <div class="topbar">
+      <div class="logo">
+        <span class="mobile-menu-btn" @click="mobileSidebar = !mobileSidebar">
+          <el-icon><Menu /></el-icon>
+        </span>
+        <div class="logo-icon">{{ isTeacher ? 'T' : 'S' }}</div>
+        <span>{{ isTeacher ? '教师工作台' : '学生学习中心' }}</span>
+      </div>
+      <div class="user-info">
+        <span class="name">{{ user.name || user.username }}</span>
+        <span class="role-tag" :class="user.role">{{ roleLabel }}</span>
+        <span class="text-sub small" v-if="user.class_info">{{ user.class_info.name }}</span>
+        <el-dropdown @command="onMenu">
+          <el-avatar :size="32" style="background: linear-gradient(135deg, #4f7cff, #7c3aed);">
+            {{ (user.name || user.username).charAt(0) }}
+          </el-avatar>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="changePwd"><el-icon><Lock /></el-icon> 修改密码</el-dropdown-item>
+              <el-dropdown-item command="logout" divided><el-icon><SwitchButton /></el-icon> 退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 修改密码弹窗 -->
+      <el-dialog v-model="pwdDialog" title="修改密码" width="420px">
+        <el-form label-width="80px">
+          <el-form-item label="旧密码" required>
+            <el-input v-model="pwdForm.old_password" type="password" show-password placeholder="请输入当前密码"></el-input>
+          </el-form-item>
+          <el-form-item label="新密码" required>
+            <el-input v-model="pwdForm.new_password" type="password" show-password placeholder="至少 6 位"></el-input>
+          </el-form-item>
+          <el-form-item label="确认新密码" required>
+            <el-input v-model="pwdForm.confirm" type="password" show-password placeholder="再输一次"></el-input>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="pwdDialog = false">取消</el-button>
+          <el-button type="primary" @click="submitPwd">确认修改</el-button>
+        </template>
+      </el-dialog>
+      <div class="sidebar" :class="{'mobile-show': mobileSidebar}">
+        <template v-if="isTeacher">
+          <div class="menu-item" :class="{active: page==='t-dash'}" @click="go('t-dash')"><el-icon class="icon"><Odometer /></el-icon>数据看板</div>
+          <div class="menu-item" :class="{active: page==='t-qbank'}" @click="go('t-qbank')"><el-icon class="icon"><Files /></el-icon>题库管理</div>
+          <div class="menu-item" :class="{active: page==='t-papers'}" @click="go('t-papers')"><el-icon class="icon"><Document /></el-icon>试卷管理</div>
+          <div class="menu-item" :class="{active: page==='t-users'}" @click="go('t-users')"><el-icon class="icon"><User /></el-icon>学生管理</div>
+          <div class="menu-item" :class="{active: page==='t-kp'}" @click="go('t-kp')"><el-icon class="icon"><Collection /></el-icon>知识点</div>
+          <div class="menu-item" :class="{active: page==='t-stats'}" @click="go('t-stats')"><el-icon class="icon"><DataAnalysis /></el-icon>成绩分析</div>
+        </template>
+        <template v-else>
+          <div class="menu-item" :class="{active: page==='s-home'}" @click="go('s-home')"><el-icon class="icon"><HomeFilled /></el-icon>首页</div>
+          <div class="menu-item" :class="{active: page==='s-practice'}" @click="go('s-practice')"><el-icon class="icon"><EditPen /></el-icon>自由练习</div>
+          <div class="menu-item" :class="{active: page==='s-exam'}" @click="go('s-exam')"><el-icon class="icon"><Document /></el-icon>考试中心</div>
+          <div class="menu-item" :class="{active: page==='s-wrong'}" @click="go('s-wrong')"><el-icon class="icon"><Warning /></el-icon>错题本</div>
+          <div class="menu-item" :class="{active: page==='s-report'}" @click="go('s-report')"><el-icon class="icon"><TrendCharts /></el-icon>学习报告</div>
+          <div class="menu-item" :class="{active: page==='s-history'}" @click="go('s-history')"><el-icon class="icon"><Clock /></el-icon>历史记录</div>
+        </template>
+      </div>
+      <div class="content" @click="mobileSidebar = false">
+        <student-home v-if="page==='s-home'" :user="user" :stats="studentStats" @goto="go" @refresh="loadStudentStats"></student-home>
+        <student-practice v-if="page==='s-practice'" :qtypes="qtypeList" @result="onAttemptFinish"></student-practice>
+        <student-exam v-if="page==='s-exam'" @result="onAttemptFinish"></student-exam>
+        <student-wrong v-if="page==='s-wrong'"></student-wrong>
+        <student-report v-if="page==='s-report'" :stats="studentStats" :kp="kpList"></student-report>
+        <student-history v-if="page==='s-history'"></student-history>
+        <teacher-dash v-if="page==='t-dash'" :stats="teacherStats" @goto="go"></teacher-dash>
+        <teacher-qbank v-if="page==='t-qbank'" :kp="kpList" :qtypes="qtypeList" @refresh="loadTeacherData"></teacher-qbank>
+        <teacher-papers v-if="page==='t-papers'" :kp="kpList" :qtypes="qtypeList" :classes="classList" @refresh="loadTeacherData"></teacher-papers>
+        <teacher-users v-if="page==='t-users'" :classes="classList" @refresh="loadTeacherData"></teacher-users>
+        <teacher-kp v-if="page==='t-kp'" :kp="kpList" @refresh="loadTeacherData"></teacher-kp>
+        <teacher-stats v-if="page==='t-stats'" :stats="teacherStats" :classes="classList" @refresh="loadTeacherData"></teacher-stats>
+      </div>
+    </div>
+    <div class="mobile-tabbar">
+      <template v-if="isTeacher">
+        <div class="tab" :class="{active: page==='t-dash'}" @click="go('t-dash')"><el-icon class="ti"><Odometer /></el-icon><span>看板</span></div>
+        <div class="tab" :class="{active: page==='t-qbank'}" @click="go('t-qbank')"><el-icon class="ti"><Files /></el-icon><span>题库</span></div>
+        <div class="tab" :class="{active: page==='t-papers'}" @click="go('t-papers')"><el-icon class="ti"><Document /></el-icon><span>试卷</span></div>
+        <div class="tab" :class="{active: page==='t-users'}" @click="go('t-users')"><el-icon class="ti"><User /></el-icon><span>学生</span></div>
+        <div class="tab" :class="{active: page==='t-stats'}" @click="go('t-stats')"><el-icon class="ti"><DataAnalysis /></el-icon><span>分析</span></div>
+      </template>
+      <template v-else>
+        <div class="tab" :class="{active: page==='s-home'}" @click="go('s-home')"><el-icon class="ti"><HomeFilled /></el-icon><span>首页</span></div>
+        <div class="tab" :class="{active: page==='s-practice'}" @click="go('s-practice')"><el-icon class="ti"><EditPen /></el-icon><span>练习</span></div>
+        <div class="tab" :class="{active: page==='s-exam'}" @click="go('s-exam')"><el-icon class="ti"><Document /></el-icon><span>考试</span></div>
+        <div class="tab" :class="{active: page==='s-wrong'}" @click="go('s-wrong')"><el-icon class="ti"><Warning /></el-icon><span>错题</span></div>
+        <div class="tab" :class="{active: page==='s-report'}" @click="go('s-report')"><el-icon class="ti"><TrendCharts /></el-icon><span>报告</span></div>
+      </template>
+    </div>
+  </template>
+</div>
+
+<script>
+const { createApp, ref, reactive, computed, onMounted, watch, nextTick, h } = Vue;
+
+// ============== HTTP 工具 ==============
+const TOKEN = () => localStorage.getItem('token') || '';
+const api = {
+  async req(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN() };
+    if (opts.body && typeof opts.body !== 'string') opts.body = JSON.stringify(opts.body);
+    const r = await fetch(path, { ...opts, headers: { ...headers, ...(opts.headers || {}) } });
+    if (r.status === 401) { localStorage.clear(); location.reload(); }
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || r.statusText);
+    return data;
+  },
+  get(p) { return this.req(p); },
+  post(p, b) { return this.req(p, { method: 'POST', body: b }); },
+  patch(p, b) { return this.req(p, { method: 'PATCH', body: b }); },
+  del(p) { return this.req(p, { method: 'DELETE' }); },
+  upload(url, file) {
+    const fd = new FormData(); fd.append('file', file);
+    return fetch(url, { method: 'POST', body: fd, headers: { 'Authorization': 'Bearer ' + TOKEN() }})
+      .then(r => r.json().then(d => { if (!r.ok) throw new Error(d.error || 'failed'); return d; }));
+  },
+  async getBlob(path) {
+    const r = await fetch(path, { headers: { 'Authorization': 'Bearer ' + TOKEN() } });
+    if (r.status === 401) { localStorage.clear(); location.reload(); throw new Error('未登录'); }
+    if (!r.ok) {
+      const t = await r.text();
+      let msg = '下载失败';
+      try { msg = JSON.parse(t).error || msg; } catch (e) {}
+      throw new Error(msg);
+    }
+    return await r.blob();
+  }
+};
+
+// ============== 全局提示 ==============
+const formatAnswer = (ans) => {
+  if (!ans) return '';
+  if (typeof ans === 'string' && ans.startsWith('[')) {
+    try { return JSON.parse(ans).join(', '); } catch (e) { return ans; }
+  }
+  return ans;
+};
+const toast = (msg, type = 'info') => {
+  ElementPlus.ElMessage({ message: msg, type, duration: 2500, showClose: true });
+};
+const confirm = (msg, title = '确认') => ElementPlus.ElMessageBox.confirm(msg, title, { type: 'warning' });
+
+// ============== 登录页 ==============
+const LoginPage = {
+  props: ['role'],
+  emits: ['login', 'switch-role'],
+  setup(props, { emit }) {
+    const username = ref('');
+    const password = ref('');
+    const loading = ref(false);
+
+    const submit = async () => {
+      if (!username.value || !password.value) { toast('请填写账号和密码', 'warning'); return; }
+      loading.value = true;
+      try {
+        const r = await api.post('/api/login', { username: username.value, password: password.value });
+        localStorage.setItem('token', r.token);
+        localStorage.setItem('user', JSON.stringify(r.user));
+        emit('login', r.user);
+      } catch (e) {
+        toast(e.message, 'error');
+        password.value = '';
+      } finally { loading.value = false; }
+    };
+
+    return { username, password, loading, submit };
+  },
+  template: `
+    <div class="login-page">
+      <div class="login-card">
+        <div class="login-title">
+          <h1>📚 中考英语真题题库</h1>
+          <p>智能化训练 · 精细化分析 · 个性化推荐</p>
+        </div>
+        <div class="role-tabs">
+          <div class="role-tab" :class="{active: role==='student', teacher: false}" @click="$emit('switch-role', 'student')">🎒 学生</div>
+          <div class="role-tab" :class="{active: role==='teacher', teacher: true}" @click="$emit('switch-role', 'teacher')">👨‍🏫 教师</div>
+        </div>
+        <el-form @submit.prevent="submit">
+          <el-form-item>
+            <el-input v-model="username" placeholder="账号" size="large" prefix-icon="User"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-input v-model="password" type="password" placeholder="密码" size="large" prefix-icon="Lock" show-password @keyup.enter="submit"></el-input>
+          </el-form-item>
+          <el-button type="primary" size="large" style="width:100%" :loading="loading" @click="submit">
+            登录
+          </el-button>
+        </el-form>
+        <div v-if="role === 'student'" style="margin-top: 16px; padding: 10px; background: #fef3c7; border-radius: 6px; font-size: 12px; color: #92400e; line-height: 1.6; text-align: left;">
+          💡 没有学生账号？请联系教师/管理员在 <strong>「学生管理」</strong> 中创建
+        </div>
+        <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed #e5e7eb; font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.7;">
+          <div>当前访问地址：<code style="background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #475569;" id="currentUrl"></code></div>
+          <div style="margin-top: 4px;">如需在手机/其他电脑访问，请使用此地址</div>
+        </div>
+      </div>
+    </div>
+  `,
+  mounted() {
+    // 显示当前访问地址
+    const el = document.getElementById('currentUrl');
+    if (el) el.textContent = location.protocol + '//' + location.host;
+  }
+};
+
+// ============== 学生 - 首页 ==============
+const StudentHome = {
+  props: ['user', 'stats'],
+  emits: ['goto', 'refresh'],
+  setup(props, { emit }) {
+    const quicks = [
+      { icon: 'EditPen', name: '自由练习', desc: '智能选题练习', color: 'linear-gradient(135deg, #4f7cff, #7c3aed)', page: 's-practice' },
+      { icon: 'Document', name: '考试中心', desc: '试卷考试', color: 'linear-gradient(135deg, #f59e0b, #d97706)', page: 's-exam' },
+      { icon: 'Warning', name: '错题本', desc: '回顾错题', color: 'linear-gradient(135deg, #ef4444, #dc2626)', page: 's-wrong' },
+      { icon: 'TrendCharts', name: '学习报告', desc: '学情分析', color: 'linear-gradient(135deg, #10b981, #059669)', page: 's-report' }
+    ];
+    return { quicks };
+  },
+  template: `
+    <div>
+      <div class="welcome">
+        <div>
+          <h2>👋 你好，{{ user.name || user.username }}！</h2>
+          <p>坚持每日一练，让进步看得见</p>
+        </div>
+        <div class="avatar">{{ (user.name || user.username).charAt(0) }}</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card primary">
+          <div class="label">累计答题</div>
+          <div class="value">{{ stats.total_q || 0 }}</div>
+          <div class="icon-bg"><el-icon><EditPen /></el-icon></div>
+        </div>
+        <div class="stat-card success">
+          <div class="label">答对题数</div>
+          <div class="value">{{ stats.total_c || 0 }}</div>
+          <div class="icon-bg"><el-icon><CircleCheckFilled /></el-icon></div>
+        </div>
+        <div class="stat-card warning">
+          <div class="label">正确率</div>
+          <div class="value">{{ ((stats.accuracy || 0) * 100).toFixed(1) }}%</div>
+          <div class="icon-bg"><el-icon><Trophy /></el-icon></div>
+        </div>
+        <div class="stat-card danger">
+          <div class="label">错题本</div>
+          <div class="value">{{ (stats.wrong_book || []).length }}</div>
+          <div class="icon-bg"><el-icon><Warning /></el-icon></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="left">快捷入口</div></div>
+        <div class="quick-grid">
+          <div v-for="q in quicks" :key="q.name" class="quick-item" @click="$emit('goto', q.page)">
+            <div class="qi-icon" :style="{background: q.color}"><el-icon><component :is="q.icon" /></el-icon></div>
+            <div class="qi-name">{{ q.name }}</div>
+            <div class="qi-desc">{{ q.desc }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <div class="left">最近 14 天学习趋势</div>
+          <el-button text @click="emit('refresh')"><el-icon><Refresh /></el-icon>刷新</el-button>
+        </div>
+        <div ref="trendChart" class="chart-box"></div>
+      </div>
+    </div>
+  `,
+  mounted() {
+    this.drawTrend();
+  },
+  watch: {
+    'stats.trend'() { this.drawTrend(); }
+  },
+  methods: {
+    drawTrend() {
+      if (!this.$refs.trendChart) return;
+      const chart = echarts.init(this.$refs.trendChart);
+      const trend = this.stats.trend || [];
+      chart.setOption({
+        tooltip: { trigger: 'axis' },
+        grid: { left: 40, right: 20, top: 30, bottom: 30 },
+        xAxis: { type: 'category', data: trend.map(t => t.date.slice(5)) },
+        yAxis: [
+          { type: 'value', name: '题数' },
+          { type: 'value', name: '正确率%', max: 100, position: 'right' }
+        ],
+        series: [
+          { name: '答题数', type: 'bar', data: trend.map(t => t.qcount), itemStyle: { color: '#4f7cff', borderRadius: [4,4,0,0] } },
+          { name: '正确率', type: 'line', yAxisIndex: 1, data: trend.map(t => (t.accuracy*100).toFixed(1)), smooth: true, lineStyle: { color: '#10b981', width: 3 }, itemStyle: { color: '#10b981' } }
+        ]
+      });
+    }
+  }
+};
+
+// ============== 学生 - 练习/考试答题 ==============
+const DoQuestions = {
+  props: ['data'],
+  emits: ['finish'],
+  setup(props, { emit }) {
+    const cur = ref(0);
+    const answers = reactive({}); // qid -> user_answer
+    const results = reactive({}); // qid -> result
+    const startTime = ref(Date.now());
+    const showResult = ref({}); // 答题后显示解析
+
+    const startAttempt = props.data;
+
+    const curQ = computed(() => startAttempt.questions[cur.value]);
+    const progress = computed(() => `${cur.value+1}/${startAttempt.questions.length}`);
+
+    const submitAns = async (qid, ans) => {
+      const timeSpent = Math.floor((Date.now() - startTime.value) / 1000) - Object.values(answers).length;
+      try {
+        const r = await api.post('/api/attempts/answer', { attempt_id: startAttempt.attempt_id, question_id: qid, user_answer: ans, time_spent: timeSpent });
+        results[qid] = r;
+        showResult.value[qid] = true;
+        toast(r.correct ? '答对了 🎉' : '答错了 😢', r.correct ? 'success' : 'error');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+
+    const next = async () => {
+      if (cur.value < startAttempt.questions.length - 1) {
+        cur.value++;
+      } else {
+        try {
+          const r = await api.post(`/api/attempts/${startAttempt.attempt_id}/submit`);
+          toast(`完成！得分 ${r.total}/${r.max_score}`, 'success');
+        } catch (e) { toast(e.message, 'error'); }
+        emit('finish');
+      }
+    };
+    return { cur, answers, results, curQ, progress, submitAns, next, showResult, startAttempt };
+  },
+  template: `
+    <div>
+      <div class="card" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div><strong>第 {{ cur+1 }} / {{ startAttempt.questions.length }} 题</strong>
+          <span v-if="startAttempt.paper_info" style="margin-left: 12px; color: #6b7280;">{{ startAttempt.paper_info.name }}</span>
+        </div>
+        <el-button type="primary" @click="next">{{ cur == startAttempt.questions.length-1 ? '提交' : '下一题' }}</el-button>
+      </div>
+      <div class="question-card card" v-if="curQ">
+        <div>
+          <span class="qtype-tag" :class="curQ.qtype">{{ curQ.qtype }}</span>
+          <span v-if="curQ.year" class="text-sub small">{{ curQ.year }}年</span>
+          <span class="text-sub small" style="margin-left: 8px;">{{ curQ.score }}分</span>
+        </div>
+        <div class="stem">{{ curQ.stem }}</div>
+        <div v-if="['单选','多选','完形填空','选词填空'].includes(curQ.qtype)">
+          <div v-for="opt in curQ.options" :key="opt.label"
+            class="opt-item"
+            :class="{
+              selected: answers[curQ.id] && answers[curQ.id].split(',').map(s=>s.trim().toUpperCase()).includes(opt.label.toUpperCase()),
+              correct: showResult[curQ.id] && JSON.parse(showResult[curQ.id] && '[]').includes(opt.label) || (results[curQ.id] && (typeof results[curQ.id].correct_answer === 'string' ? results[curQ.id].correct_answer.toUpperCase().includes(opt.label.toUpperCase()) : false)),
+              wrong: showResult[curQ.id] && answers[curQ.id] && answers[curQ.id].toUpperCase().includes(opt.label.toUpperCase()) && !(results[curQ.id] && results[curQ.id].correct)
+            }"
+            @click="!showResult[curQ.id] && (curQ.qtype==='单选' ? (answers[curQ.id]=opt.label, submitAns(curQ.id, opt.label)) : (()=>{let a=(answers[curQ.id]||'').split(',').map(s=>s.trim()).filter(Boolean);if(a.includes(opt.label))a=a.filter(x=>x!==opt.label);else a.push(opt.label);answers[curQ.id]=a.join(',');})())">
+            <span class="label">{{ opt.label }}.</span>
+            <span>{{ opt.content }}</span>
+          </div>
+          <div v-if="curQ.qtype !== '单选' && !showResult[curQ.id]" style="margin-top: 10px; display: flex; gap: 8px;">
+            <el-button type="primary" @click="submitAns(curQ.id, answers[curQ.id] || '')" :disabled="!answers[curQ.id]">提交答案</el-button>
+            <span class="text-sub small" style="align-self: center;">多选用逗号分隔，如 A,B</span>
+          </div>
+        </div>
+        <div v-else>
+          <el-input v-model="answers[curQ.id]" type="textarea" :rows="4" placeholder="请输入答案（主观题不计分）" :disabled="showResult[curQ.id]"></el-input>
+          <div v-if="!showResult[curQ.id]" style="margin-top: 10px;">
+            <el-button type="primary" @click="submitAns(curQ.id, answers[curQ.id] || '')">提交答案</el-button>
+          </div>
+        </div>
+        <div v-if="showResult[curQ.id] && results[curQ.id]" class="answer-area">
+          <div v-if="curQ.qtype !== '单选' && curQ.qtype !== '多选' && curQ.qtype !== '完形填空' && curQ.qtype !== '选词填空'">
+            <div class="label">📝 答案：</div>
+            <div>{{ results[curQ.id].correct_answer }}</div>
+          </div>
+          <div v-else>
+            <div><span class="text-sub">你的答案：</span><span class="user-answer">{{ results[curQ.id].user_answer || '未答' }}</span></div>
+            <div><span class="text-sub">正确答案：</span><span class="correct-answer">{{ results[curQ.id].correct_answer }}</span></div>
+          </div>
+          <div v-if="results[curQ.id].analysis" class="analysis">💡 {{ results[curQ.id].analysis }}</div>
+        </div>
+      </div>
+    </div>
+  `
+};
+
+// ============== 学生 - 自由练习 ==============
+const StudentPractice = {
+  components: { DoQuestions },
+  props: ['qtypes'],
+  emits: ['result'],
+  setup(props, { emit }) {
+    const view = ref('config'); // config / doing
+    const form = reactive({ count: 10, qtype: '' });
+    const attempt = ref(null);
+    const start = async () => {
+      try {
+        attempt.value = await api.post('/api/attempts/start', { mode: 'free', count: form.count, qtype: form.qtype });
+        view.value = 'doing';
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    return { view, form, attempt, start };
+  },
+  template: `
+    <div v-if="view==='config'">
+      <div class="card">
+        <div class="card-title"><div class="left">开始自由练习</div></div>
+        <el-form label-width="80px">
+          <el-form-item label="题目数量">
+            <el-radio-group v-model="form.count">
+              <el-radio-button :value="5">5 题</el-radio-button>
+              <el-radio-button :value="10">10 题</el-radio-button>
+              <el-radio-button :value="20">20 题</el-radio-button>
+              <el-radio-button :value="30">30 题</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="题型">
+            <el-radio-group v-model="form.qtype">
+              <el-radio-button value="">全部</el-radio-button>
+              <el-radio-button v-for="t in qtypes" :key="t" :value="t">{{ t }}</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" size="large" @click="start">开始练习</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+    <do-questions v-else :data="attempt" @finish="view='config'; $emit('result')"></do-questions>
+  `
+};
+
+// ============== 学生 - 考试中心 ==============
+const StudentExam = {
+  components: { DoQuestions },
+  emits: ['result'],
+  setup() {
+    const papers = ref([]);
+    const view = ref('list');
+    const attempt = ref(null);
+    const load = async () => { papers.value = await api.get('/api/papers'); };
+    const start = async (p) => {
+      try {
+        attempt.value = await api.post('/api/attempts/start', { mode: 'exam', paper_id: p.id });
+        view.value = 'doing';
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    onMounted(load);
+    return { papers, view, attempt, start, load };
+  },
+  template: `
+    <div v-if="view==='list'">
+      <div class="card">
+        <div class="card-title">
+          <div class="left">考试中心</div>
+          <el-button text @click="load"><el-icon><Refresh /></el-icon></el-button>
+        </div>
+        <div v-if="papers.length === 0" class="empty">
+          <div class="icon">📝</div>
+          <div>暂无可参加的考试</div>
+        </div>
+        <el-table v-else :data="papers" stripe>
+          <el-table-column prop="name" label="试卷名称" min-width="160"></el-table-column>
+          <el-table-column prop="class_name" label="班级" width="100"></el-table-column>
+          <el-table-column label="时长" width="80">
+            <template #default="{row}">{{ row.duration_minutes }} 分钟</template>
+          </el-table-column>
+          <el-table-column label="题数" width="70">
+            <template #default="{row}">{{ row.question_count }}</template>
+          </el-table-column>
+          <el-table-column label="总分" width="70">
+            <template #default="{row}">{{ row.total_score }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="100" fixed="right">
+            <template #default="{row}">
+              <el-button type="primary" size="small" @click="start(row)">开始考试</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+    <do-questions v-else :data="attempt" @finish="view='list'; $emit('result'); load()"></do-questions>
+  `
+};
+
+// ============== 学生 - 错题本 ==============
+const StudentWrong = {
+  components: { DoQuestions },
+  setup() {
+    const list = ref([]);
+    const showMastered = ref(false);
+    const view = ref('list');
+    const attempt = ref(null);
+    const load = async () => { list.value = await api.get('/api/wrong-book' + (showMastered.value ? '?mastered=true' : '')); };
+    const review = async () => {
+      try {
+        const wrongIds = list.value.filter(w => !w.mastered).map(w => w.question_id);
+        if (wrongIds.length === 0) { toast('没有需要复习的错题', 'info'); return; }
+        const r = await api.post('/api/attempts/start', { mode: 'review', count: wrongIds.length });
+        view.value = 'doing';
+        attempt.value = r;
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    const master = async (id) => { await api.post('/api/wrong-book/master/' + id); toast('已标记掌握', 'success'); load(); };
+    onMounted(load);
+    watch(showMastered, load);
+    return { list, showMastered, view, attempt, load, review, master };
+  },
+  template: `
+    <div v-if="view==='list'">
+      <div class="card">
+        <div class="card-title">
+          <div class="left">错题本 ({{ list.length }})</div>
+          <div class="flex gap-8">
+            <el-switch v-model="showMastered" active-text="显示已掌握" @change="load"></el-switch>
+            <el-button type="primary" @click="review" :disabled="list.filter(w=>!w.mastered).length===0">
+              <el-icon><Refresh /></el-icon>重新练习错题
+            </el-button>
+          </div>
+        </div>
+        <div v-if="list.length === 0" class="empty"><div class="icon">🎉</div><div>暂无错题，太棒了！</div></div>
+        <el-table v-else :data="list" stripe>
+          <el-table-column prop="stem" label="题目" min-width="300" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="qtype" label="题型" width="90"></el-table-column>
+          <el-table-column prop="wrong_count" label="错次" width="70"></el-table-column>
+          <el-table-column prop="last_wrong_at" label="最近错误" width="160"></el-table-column>
+          <el-table-column label="状态" width="90">
+            <template #default="{row}">
+              <el-tag v-if="row.mastered" type="success">已掌握</el-tag>
+              <el-tag v-else type="danger">未掌握</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="100" fixed="right">
+            <template #default="{row}">
+              <el-button v-if="!row.mastered" size="small" type="success" @click="master(row.id)">掌握</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+    <do-questions v-else :data="attempt" @finish="view='list'; load()"></do-questions>
+  `
+};
+
+// ============== 学生 - 学习报告 ==============
+const StudentReport = {
+  props: ['stats', 'kp'],
+  setup(props) {
+    const trendRef = ref(null);
+    const kpRef = ref(null);
+    const typeRef = ref(null);
+
+    const drawAll = () => {
+      nextTick(() => {
+        if (trendRef.value) {
+          const chart = echarts.init(trendRef.value);
+          const trend = props.stats.trend || [];
+          chart.setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { left: 50, right: 30, top: 30, bottom: 30 },
+            xAxis: { type: 'category', data: trend.map(t => t.date.slice(5)) },
+            yAxis: { type: 'value', name: '正确率%', max: 100 },
+            series: [{ name: '正确率', type: 'line', smooth: true, data: trend.map(t => (t.accuracy*100).toFixed(1)), areaStyle: { color: 'rgba(79, 124, 255, 0.2)' }, lineStyle: { color: '#4f7cff', width: 3 }, itemStyle: { color: '#4f7cff' } }]
+          });
+        }
+        if (kpRef.value) {
+          const chart = echarts.init(kpRef.value);
+          const kps = (props.stats.kp_stats || []).slice(0, 10);
+          chart.setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { left: 100, right: 30, top: 20, bottom: 30 },
+            xAxis: { type: 'value', max: 100, name: '正确率%' },
+            yAxis: { type: 'category', data: kps.map(k => k.kp), inverse: true },
+            series: [{
+              type: 'bar', data: kps.map(k => ({ value: (k.accuracy*100).toFixed(1), itemStyle: { color: k.accuracy < 0.6 ? '#ef4444' : k.accuracy < 0.8 ? '#f59e0b' : '#10b981' }})),
+              label: { show: true, position: 'right', formatter: '{c}%' }
+            }]
+          });
+        }
+        if (typeRef.value) {
+          const chart = echarts.init(typeRef.value);
+          const types = props.stats.type_stats || [];
+          chart.setOption({
+            tooltip: { trigger: 'item' },
+            series: [{ type: 'pie', radius: ['40%', '70%'], data: types.map(t => ({ name: t.qtype, value: t.qcount })), label: { formatter: '{b}\n{c}题 ({d}%)' } }]
+          });
+        }
+      });
+    };
+    onMounted(drawAll);
+    watch(() => props.stats, drawAll, { deep: true });
+    return { trendRef, kpRef, typeRef };
+  },
+  template: `
+    <div>
+      <div class="stat-grid">
+        <div class="stat-card primary"><div class="label">累计答题</div><div class="value">{{ stats.total_q || 0 }}</div></div>
+        <div class="stat-card success"><div class="label">答对</div><div class="value">{{ stats.total_c || 0 }}</div></div>
+        <div class="stat-card warning"><div class="label">正确率</div><div class="value">{{ ((stats.accuracy || 0) * 100).toFixed(1) }}%</div></div>
+        <div class="stat-card info"><div class="label">练习次数</div><div class="value">{{ stats.attempts || 0 }}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="left">14 天正确率趋势</div></div>
+        <div ref="trendRef" class="chart-box"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="card">
+          <div class="card-title"><div class="left">知识点掌握情况</div></div>
+          <div ref="kpRef" class="chart-box"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="left">题型分布</div></div>
+          <div ref="typeRef" class="chart-box"></div>
+        </div>
+      </div>
+      <div class="card" v-if="(stats.paper_scores || []).length > 0">
+        <div class="card-title"><div class="left">最近考试</div></div>
+        <el-table :data="stats.paper_scores" stripe>
+          <el-table-column prop="paper_name" label="试卷" min-width="160"></el-table-column>
+          <el-table-column label="成绩" width="100">
+            <template #default="{row}"><strong>{{ row.score_earned.toFixed(1) }} / {{ row.max_score.toFixed(0) }}</strong></template>
+          </el-table-column>
+          <el-table-column label="得分率" width="100">
+            <template #default="{row}">{{ ((row.score_earned / row.max_score) * 100).toFixed(1) }}%</template>
+          </el-table-column>
+          <el-table-column prop="correct" label="答对" width="70"></el-table-column>
+          <el-table-column prop="qcount" label="总题" width="70"></el-table-column>
+          <el-table-column prop="submitted_at" label="时间" width="160"></el-table-column>
+        </el-table>
+      </div>
+    </div>
+  `
+};
+
+// ============== 学生 - 历史记录 ==============
+const StudentHistory = {
+  setup() {
+    const list = ref([]);
+    const reviewDialog = ref(false);
+    const reviewData = ref(null);
+    const load = async () => { list.value = await api.get('/api/attempts/history'); };
+    const doReview = async (row) => {
+      const r = await api.get('/api/attempts/' + row.id + '/review');
+      reviewData.value = r;
+      reviewDialog.value = true;
+    };
+    onMounted(load);
+    return { list, reviewDialog, reviewData, doReview, load };
+  },
+  template: `
+    <div class="card">
+      <div class="card-title">
+        <div class="left">历史记录</div>
+        <el-button text @click="load"><el-icon><Refresh /></el-icon></el-button>
+      </div>
+      <div v-if="list.length === 0" class="empty"><div class="icon">📋</div><div>暂无历史记录</div></div>
+      <el-table v-else :data="list" stripe>
+        <el-table-column label="类型" width="90">
+          <template #default="{row}">
+            <el-tag v-if="row.paper_id" type="warning">考试</el-tag>
+            <el-tag v-else>练习</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="paper_name" label="名称" min-width="160">
+          <template #default="{row}">{{ row.paper_name || '自由练习' }}</template>
+        </el-table-column>
+        <el-table-column label="成绩" width="120">
+          <template #default="{row}">
+            <strong v-if="row.max_score">{{ row.score_earned.toFixed(1) }} / {{ row.max_score.toFixed(0) }}</strong>
+            <span v-else>{{ row.correct }} / {{ row.qcount }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="submitted_at" label="时间" width="180"></el-table-column>
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{row}">
+            <el-button size="small" @click="doReview(row)">回顾</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <el-dialog v-model="reviewDialog" title="答题回顾" width="700px" top="5vh">
+      <div v-if="reviewData" style="max-height: 70vh; overflow-y: auto;">
+        <div v-for="(a, idx) in reviewData.answers" :key="a.id" class="card" style="margin-bottom: 12px;">
+          <div><span style="font-weight: 700;">第{{ idx+1 }}题</span>
+            <el-tag :type="a.is_correct ? 'success' : 'danger'" size="small" style="margin-left: 8px;">{{ a.is_correct ? '正确' : '错误' }}</el-tag>
+          </div>
+          <div v-if="a.question" style="margin-top: 8px;">{{ a.question.stem }}</div>
+          <div class="text-sub small" style="margin-top: 4px;">你的答案: <strong>{{ a.user_answer || '未答' }}</strong></div>
+          <div class="text-sub small">正确答案: <strong class="text-success">{{ formatAnswer(a.question?.answer) }}</strong></div>
+        </div>
+      </div>
+    </el-dialog>
+  `
+};
+
+// ============== 教师 - 数据看板 ==============
+const TeacherDash = {
+  props: ['stats'],
+  emits: ['goto'],
+  setup(props) {
+    const kpChart = ref(null);
+    const typeChart = ref(null);
+    const drawCharts = () => {
+      nextTick(() => {
+        if (kpChart.value) {
+          const chart = echarts.init(kpChart.value);
+          const data = (props.stats.kp_summary || []).slice(0, 8);
+          chart.setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { left: 100, right: 30, top: 20, bottom: 30 },
+            xAxis: { type: 'value', max: 100 },
+            yAxis: { type: 'category', data: data.map(d => d.kp), inverse: true },
+            series: [{
+              type: 'bar', data: data.map(d => ({ value: (d.accuracy*100).toFixed(1), itemStyle: { color: d.accuracy < 0.5 ? '#ef4444' : d.accuracy < 0.7 ? '#f59e0b' : '#10b981' }})),
+              label: { show: true, position: 'right', formatter: '{c}%' }
+            }]
+          });
+        }
+        if (typeChart.value) {
+          const chart = echarts.init(typeChart.value);
+          chart.setOption({
+            tooltip: { trigger: 'item' },
+            series: [{ type: 'pie', radius: ['40%', '70%'], data: (props.stats.type_dist || []).map(t => ({ name: t.name, value: t.count })), label: { formatter: '{b}\n{c}题' } }]
+          });
+        }
+      });
+    };
+    onMounted(drawCharts);
+    watch(() => props.stats, drawCharts, { deep: true });
+    return { kpChart, typeChart };
+  },
+  template: `
+    <div>
+      <div class="stat-grid">
+        <div class="stat-card primary"><div class="label">学生数</div><div class="value">{{ stats.total_students || 0 }}</div><div class="icon-bg"><el-icon><User /></el-icon></div></div>
+        <div class="stat-card success"><div class="label">题库数</div><div class="value">{{ stats.total_questions || 0 }}</div><div class="icon-bg"><el-icon><Files /></el-icon></div></div>
+        <div class="stat-card warning"><div class="label">试卷数</div><div class="value">{{ stats.total_papers || 0 }}</div><div class="icon-bg"><el-icon><Document /></el-icon></div></div>
+        <div class="stat-card info"><div class="label">答题次数</div><div class="value">{{ stats.total_attempts || 0 }}</div><div class="icon-bg"><el-icon><EditPen /></el-icon></div></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="card">
+          <div class="card-title"><div class="left">全站知识点弱项（最弱 8 项）</div></div>
+          <div ref="kpChart" class="chart-box"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="left">题型分布</div></div>
+          <div ref="typeChart" class="chart-box"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <div class="left">学生数据概览</div>
+          <el-button type="primary" size="small" @click="$emit('goto', 't-users')">查看全部 →</el-button>
+        </div>
+        <el-table :data="(stats.students || []).slice(0, 10)" stripe>
+          <el-table-column prop="name" label="姓名" min-width="80"></el-table-column>
+          <el-table-column prop="username" label="账号" min-width="100"></el-table-column>
+          <el-table-column prop="class_name" label="班级" min-width="100"></el-table-column>
+          <el-table-column label="答题数" width="80">
+            <template #default="{row}">{{ row.total_q }}</template>
+          </el-table-column>
+          <el-table-column label="正确率" width="100">
+            <template #default="{row}">
+              <el-progress :percentage="Math.round((row.accuracy||0)*100)" :stroke-width="10" :status="row.accuracy > 0.8 ? 'success' : row.accuracy > 0.6 ? '' : 'exception'"></el-progress>
+            </template>
+          </el-table-column>
+          <el-table-column label="平均得分率" width="100">
+            <template #default="{row}">{{ ((row.avg_score_ratio||0) * 100).toFixed(1) }}%</template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+  `
+};
+
+// ============== 教师 - 题库管理 ==============
+const TeacherQbank = {
+  props: ['kp', 'qtypes'],
+  emits: ['refresh'],
+  setup(props, { emit }) {
+    const list = ref([]);
+    const total = ref(0);
+    const filters = reactive({ q: '', qtype: '', kp: '', difficulty: '' });
+    const page = ref(1);
+    const pageSize = ref(20);
+    const editDialog = ref(false);
+    const importDialog = ref(false);
+    const editForm = ref(null);
+    const fileInput = ref(null);
+    const summary = ref({});
+
+    const load = async () => {
+      const params = new URLSearchParams();
+      if (filters.q) params.set('q', filters.q);
+      if (filters.qtype) params.set('qtype', filters.qtype);
+      if (filters.kp) params.set('kp', filters.kp);
+      if (filters.difficulty) params.set('difficulty', filters.difficulty);
+      params.set('limit', '500');
+      const data = await api.get('/api/questions?' + params);
+      list.value = data;
+      total.value = data.length;
+    };
+    const loadSummary = async () => { summary.value = await api.get('/api/questions/summary'); };
+
+    const openEdit = (q) => {
+      const base = q ? { ...q, options: (q.options || []).map(o=>({...o})) } : { qtype: '单选', difficulty: 3, score: 2, options: [{label:'A',content:''},{label:'B',content:''},{label:'C',content:''},{label:'D',content:''}], kp: [] };
+      // answer 编辑时解析 JSON 字符串，保存时回填
+      if (base.answer && typeof base.answer === 'string' && base.answer.startsWith('[')) {
+        try { base.answer = JSON.parse(base.answer).join(','); } catch (e) {}
+      } else if (Array.isArray(base.answer)) {
+        base.answer = base.answer.join(',');
+      }
+      editForm.value = base;
+      editDialog.value = true;
+    };
+    const saveEdit = async () => {
+      try {
+        if (editForm.value.id) {
+          await api.patch('/api/questions/' + editForm.value.id, editForm.value);
+          toast('修改成功', 'success');
+        } else {
+          await api.post('/api/questions', editForm.value);
+          toast('新增成功', 'success');
+        }
+        editDialog.value = false;
+        load(); loadSummary(); emit('refresh');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    const del = async (q) => {
+      try { await confirm('确定删除该题目？此操作不可恢复'); await api.del('/api/questions/' + q.id); toast('已删除', 'success'); load(); loadSummary(); emit('refresh'); }
+      catch (e) { /* user cancel */ }
+    };
+    const doImport = async (ev) => {
+      let f = null;
+      if (ev && ev.target && ev.target.files) f = ev.target.files[0];
+      if (ev && ev.raw && ev.raw.file) f = ev.raw.file;
+      if (!f) { toast('请选择文件', 'warning'); return; }
+      try {
+        const r = await api.upload('/api/questions/import', f);
+        toast(`导入成功 ${r.inserted} 条，失败 ${r.failed}`, 'success');
+        if (r.errors && r.errors.length) {
+          console.log('Import errors:', r.errors);
+          toast(`前几条错误: ${r.errors.slice(0,3).map(e=>e.error).join('; ')}`, 'warning');
+        }
+        importDialog.value = false; load(); loadSummary(); emit('refresh');
+      } catch (e) { toast(e.message, 'error'); }
+      if (fileInput.value) fileInput.value.value = '';
+    };
+    const importTab = ref('excel');
+    const excelHelpOpen = ref(['1', '2']);
+    const excelFields = [
+      {col:'qtype', required:'是', desc:'题型：单选/多选/完形填空/选词填空/阅读理解/翻译/作文'},
+      {col:'stem', required:'是', desc:'题干文本'},
+      {col:'answer', required:'是', desc:'参考答案。单选填 A；多选/完形填 A,B,C'},
+      {col:'option_a', required:'选择题必填', desc:'A 选项内容'},
+      {col:'option_b', required:'选择题必填', desc:'B 选项内容'},
+      {col:'option_c', required:'', desc:'C 选项内容（可选）'},
+      {col:'option_d', required:'', desc:'D 选项内容（可选）'},
+      {col:'option_e', required:'', desc:'E 选项内容（可选）'},
+      {col:'option_f', required:'', desc:'F 选项内容（可选）'},
+      {col:'kp', required:'', desc:'知识点编码，多个用 ; 分隔'},
+      {col:'difficulty', required:'', desc:'难度 1-5，默认 3'},
+      {col:'score', required:'', desc:'分值，默认 2'},
+      {col:'year', required:'', desc:'年份'},
+      {col:'source', required:'', desc:'来源'},
+      {col:'analysis', required:'', desc:'答案解析'},
+    ];
+    const downloadExcelTemplate = async () => {
+      try {
+        const blob = await api.getBlob('/api/questions/import?format=template');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '题库导入模板.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('模板已下载，打开 Excel 填好题目后上传即可', 'success');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    const onExcelFileChange = (file) => {
+      if (file && file.raw) doImport(file);
+    };
+    const onExcelExceed = () => {
+      toast('只能上传 1 个文件', 'warning');
+    };
+    onMounted(() => { load(); loadSummary(); });
+    return { list, total, filters, page, pageSize, editDialog, importDialog, editForm, fileInput, openEdit, saveEdit, del, doImport, load, summary, importTab, excelHelpOpen, excelFields, downloadExcelTemplate, onExcelFileChange, onExcelExceed };
+  },
+  template: `
+    <div>
+      <div class="stat-grid">
+        <div class="stat-card primary"><div class="label">题库总数</div><div class="value">{{ summary.total || 0 }}</div></div>
+        <div class="stat-card success" v-for="t in (summary.by_type || []).slice(0,3)" :key="t.name">
+          <div class="label">{{ t.name }}</div><div class="value">{{ t.count }}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <div class="left">题库管理 ({{ total }} 题)</div>
+          <div class="flex gap-8">
+            <el-button type="primary" @click="openEdit(null)"><el-icon><Plus /></el-icon>手动录入</el-button>
+            <el-button @click="importDialog = true"><el-icon><Upload /></el-icon>批量导入</el-button>
+          </div>
+        </div>
+        <div class="table-toolbar">
+          <el-input v-model="filters.q" placeholder="搜索题干/分析" clearable @change="load" @clear="load"></el-input>
+          <el-select v-model="filters.qtype" placeholder="题型" clearable @change="load">
+            <el-option v-for="t in qtypes" :key="t" :value="t" :label="t"></el-option>
+          </el-select>
+          <el-select v-model="filters.kp" placeholder="知识点" clearable filterable @change="load">
+            <el-option v-for="k in kp" :key="k.id" :value="k.code" :label="k.name + ' (' + k.code + ')'"></el-option>
+          </el-select>
+          <el-select v-model="filters.difficulty" placeholder="难度" clearable @change="load">
+            <el-option v-for="d in [1,2,3,4,5]" :key="d" :value="d" :label="d + ' 星'"></el-option>
+          </el-select>
+        </div>
+        <el-table :data="list" stripe>
+          <el-table-column type="index" width="50" :index="(i)=>(page-1)*pageSize + i + 1"></el-table-column>
+          <el-table-column label="题型" width="90">
+            <template #default="{row}"><span class="qtype-tag" :class="row.qtype">{{ row.qtype }}</span></template>
+          </el-table-column>
+          <el-table-column prop="stem" label="题干" min-width="300" show-overflow-tooltip></el-table-column>
+          <el-table-column label="知识点" width="200">
+            <template #default="{row}">
+              <div class="tag-list">
+                <span v-for="k in row.kp" :key="k" class="tag">{{ k }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="difficulty" label="难度" width="80">
+            <template #default="{row}">
+              <span v-for="i in row.difficulty" :key="i">⭐</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="score" label="分值" width="60"></el-table-column>
+          <el-table-column prop="year" label="年份" width="70"></el-table-column>
+          <el-table-column label="操作" width="140" fixed="right">
+            <template #default="{row}">
+              <el-button size="small" @click="openEdit(row)">编辑</el-button>
+              <el-button size="small" type="danger" @click="del(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <el-dialog v-model="editDialog" :title="editForm?.id ? '编辑题目' : '新增题目'" width="800px" top="5vh">
+        <el-form v-if="editForm" label-width="90px" style="max-height: 70vh; overflow-y: auto; padding-right: 8px;">
+          <el-form-item label="题型" required>
+            <el-select v-model="editForm.qtype">
+              <el-option v-for="t in qtypes" :key="t" :value="t" :label="t"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="题干" required>
+            <el-input v-model="editForm.stem" type="textarea" :rows="4"></el-input>
+          </el-form-item>
+          <el-form-item label="选项" v-if="['单选','多选','完形填空','选词填空'].includes(editForm.qtype)">
+            <div style="width: 100%;">
+              <div v-for="(opt, idx) in editForm.options" :key="idx" style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <el-input v-model="opt.label" placeholder="标签" style="width: 80px;"></el-input>
+                <el-input v-model="opt.content" placeholder="内容"></el-input>
+                <el-button @click="editForm.options.splice(idx, 1)" :disabled="editForm.options.length <= 2">删</el-button>
+              </div>
+              <el-button @click="editForm.options.push({label: String.fromCharCode(65+editForm.options.length), content: ''})">+ 添加选项</el-button>
+            </div>
+          </el-form-item>
+          <el-form-item label="答案" required>
+            <el-input v-model="editForm.answer" placeholder='单选填 A；多选/完形填 A,B,C'></el-input>
+          </el-form-item>
+          <el-form-item label="解析">
+            <el-input v-model="editForm.analysis" type="textarea" :rows="2"></el-input>
+          </el-form-item>
+          <el-form-item label="知识点">
+            <el-select v-model="editForm.kp" multiple filterable allow-create placeholder="选择或输入编码">
+              <el-option v-for="k in kp" :key="k.id" :value="k.code" :label="k.name + ' (' + k.code + ')'"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="难度">
+            <el-rate v-model="editForm.difficulty" :max="5"></el-rate>
+          </el-form-item>
+          <el-form-item label="分值">
+            <el-input-number v-model="editForm.score" :min="1" :max="20"></el-input-number>
+          </el-form-item>
+          <el-form-item label="年份">
+            <el-input-number v-model="editForm.year" :min="2000" :max="2030" placeholder="选填"></el-input-number>
+          </el-form-item>
+          <el-form-item label="来源">
+            <el-input v-model="editForm.source" placeholder="如 2023 北京中考"></el-input>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="editDialog = false">取消</el-button>
+          <el-button type="primary" @click="saveEdit">保存</el-button>
+        </template>
+      </el-dialog>
+
+      <el-dialog v-model="importDialog" title="批量导入题目" width="680px" top="6vh">
+        <el-tabs v-model="importTab">
+          <el-tab-pane label="📊 Excel 导入" name="excel">
+            <el-steps :active="3" finish-status="success" simple style="margin-bottom: 16px;">
+              <el-step title="下载模板"></el-step>
+              <el-step title="填入题目"></el-step>
+              <el-step title="上传文件"></el-step>
+            </el-steps>
+            <el-card shadow="never" style="background: #f0f9ff; border-color: #bae6fd; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <el-icon size="32" color="#0ea5e9"><Document /></el-icon>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #075985;">Excel 模板下载</div>
+                  <div style="font-size: 12px; color: #64748b;">含示例题 + 全部字段说明（推荐）</div>
+                </div>
+                <el-button type="primary" @click="downloadExcelTemplate">
+                  <el-icon><Download /></el-icon> 下载模板
+                </el-button>
+              </div>
+            </el-card>
+            <el-divider>上传 Excel 文件</el-divider>
+            <el-upload drag :auto-upload="false" accept=".xlsx,.xlsm" :show-file-list="true" :on-change="onExcelFileChange" :limit="1" :on-exceed="onExcelExceed">
+              <el-icon class="el-icon--upload"><Upload-filled /></el-icon>
+              <div class="el-upload__text">将 Excel 文件拖到此处，或<em>点击选择文件</em></div>
+              <template #tip>
+                <div class="el-upload__tip">仅支持 .xlsx / .xlsm 格式，第一行必须为表头</div>
+              </template>
+            </el-upload>
+            <el-collapse v-model="excelHelpOpen" style="margin-top: 16px;">
+              <el-collapse-item title="📋 Excel 字段说明" name="1">
+                <el-table :data="excelFields" size="small" border>
+                  <el-table-column prop="col" label="列名" width="120"></el-table-column>
+                  <el-table-column prop="required" label="必填" width="60"></el-table-column>
+                  <el-table-column prop="desc" label="说明"></el-table-column>
+                </el-table>
+              </el-collapse-item>
+              <el-collapse-item title="💡 Excel 填写示例" name="2">
+                <div style="font-size: 13px; line-height: 1.8;">
+                  <div>• <b>qtype</b> 必填，只能填：单选 / 多选 / 完形填空 / 选词填空 / 阅读理解 / 翻译 / 作文</div>
+                  <div>• <b>stem</b> 必填，题干（支持中文、英文、emoji）</div>
+                  <div>• <b>answer</b> 必填，单选填 A；多选/完形填 A,B,C（英文逗号分隔）</div>
+                  <div>• <b>option_a ~ option_f</b> 选择题选项，单选/多选/完形必填 ≥ 2 项</div>
+                  <div>• <b>kp</b> 知识点编码，多个用 <code>;</code> 分隔，如 <code>KP_GRAMMAR_TENSE;KP_VOCAB_NOUN</code></div>
+                  <div>• <b>difficulty</b> 难度 1-5，默认 3</div>
+                  <div>• <b>score</b> 分值，默认 2</div>
+                  <div>• <b>year</b> 年份，如 2023</div>
+                  <div>• <b>source</b> 来源，如 "2023 北京中考"</div>
+                  <div>• <b>analysis</b> 答案解析</div>
+                </div>
+              </el-collapse-item>
+            </el-collapse>
+          </el-tab-pane>
+          <el-tab-pane label="📄 JSON / CSV" name="json">
+            <el-alert type="info" :closable="false" style="margin-bottom: 12px;">
+              <div>支持格式：<b>JSON</b> / <b>CSV</b></div>
+              <div style="margin-top: 8px; font-size: 12px;">JSON 字段：qtype, stem, answer, options（数组）, kp, difficulty, score, year, source, analysis</div>
+              <div style="margin-top: 8px; font-size: 12px;">CSV 表头：qtype, stem, answer, option_a, option_b, option_c, option_d, kp, difficulty, score, year, source, analysis</div>
+            </el-alert>
+            <input ref="fileInput" type="file" accept=".json,.csv" @change="doImport" />
+          </el-tab-pane>
+        </el-tabs>
+      </el-dialog>
+    </div>
+  `
+};
+
+// ============== 教师 - 试卷管理 ==============
+const TeacherPapers = {
+  props: ['kp', 'qtypes', 'classes'],
+  emits: ['refresh'],
+  setup(props, { emit }) {
+    const list = ref([]);
+    const editDialog = ref(false);
+    const form = ref(null);
+    const availableQ = ref([]);
+    const selectedQ = ref([]);
+
+    const load = async () => { list.value = await api.get('/api/papers'); };
+    const openNew = () => {
+      form.value = { name: '', description: '', duration_minutes: 120, total_score: 100, class_id: null, published: true, question_ids: [] };
+      selectedQ.value = []; availableQ.value = [];
+      editDialog.value = true;
+    };
+    const openEdit = async (p) => {
+      const detail = await api.get('/api/papers/' + p.id);
+      form.value = { id: detail.id, name: detail.name, description: detail.description, duration_minutes: detail.duration_minutes, total_score: detail.total_score, class_id: detail.class_id, published: !!detail.published, question_ids: detail.questions.map(q => q.id) };
+      selectedQ.value = detail.questions;
+      editDialog.value = true;
+    };
+    const loadAvailable = async () => {
+      availableQ.value = await api.get('/api/questions?limit=500');
+    };
+    const save = async () => {
+      try {
+        if (form.value.id) {
+          await api.post('/api/papers/' + form.value.id + '/update', form.value);
+          toast('修改成功', 'success');
+        } else {
+          await api.post('/api/papers', form.value);
+          toast('创建成功', 'success');
+        }
+        editDialog.value = false; load(); emit('refresh');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    const del = async (p) => {
+      try { await confirm('确定删除该试卷？'); await api.del('/api/papers/' + p.id); toast('已删除', 'success'); load(); emit('refresh'); }
+      catch (e) {}
+    };
+    const view = async (p) => {
+      const d = await api.get('/api/papers/' + p.id);
+      ElMessageBox.alert(`<div style="max-height:60vh;overflow-y:auto;text-align:left;">${d.questions.map((q,i)=>`<div style='margin-bottom:8px;'><b>${i+1}.</b> ${q.stem}<br><span style='color:#666;'>答案: ${formatAnswer(q.answer)}</span></div>`).join('')}</div>`, '试卷预览: ' + d.name, { dangerouslyUseHTMLString: true });
+    };
+    onMounted(load);
+    return { list, editDialog, form, openNew, openEdit, save, del, view, load, availableQ, selectedQ, loadAvailable };
+  },
+  template: `
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <div class="left">试卷管理</div>
+          <el-button type="primary" @click="openNew"><el-icon><Plus /></el-icon>新建试卷</el-button>
+        </div>
+        <el-table :data="list" stripe>
+          <el-table-column prop="name" label="试卷名称" min-width="200"></el-table-column>
+          <el-table-column prop="class_name" label="分配班级" width="120">
+            <template #default="{row}">{{ row.class_name || '全部' }}</template>
+          </el-table-column>
+          <el-table-column label="时长" width="80">
+            <template #default="{row}">{{ row.duration_minutes }} 分</template>
+          </el-table-column>
+          <el-table-column label="题数" width="70">
+            <template #default="{row}">{{ row.question_count }}</template>
+          </el-table-column>
+          <el-table-column prop="total_score" label="总分" width="70"></el-table-column>
+          <el-table-column label="状态" width="80">
+            <template #default="{row}">
+              <el-tag :type="row.published ? 'success' : 'info'">{{ row.published ? '已发布' : '未发布' }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="220" fixed="right">
+            <template #default="{row}">
+              <el-button size="small" @click="view(row)">预览</el-button>
+              <el-button size="small" type="primary" @click="openEdit(row)">编辑</el-button>
+              <el-button size="small" type="danger" @click="del(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <el-dialog v-model="editDialog" :title="form?.id ? '编辑试卷' : '新建试卷'" width="900px" top="5vh" @open="loadAvailable">
+        <el-form v-if="form" label-width="100px">
+          <el-form-item label="试卷名称" required>
+            <el-input v-model="form.name" placeholder="如 2023 北京中考真题"></el-input>
+          </el-form-item>
+          <el-form-item label="说明">
+            <el-input v-model="form.description" type="textarea" :rows="2"></el-input>
+          </el-form-item>
+          <el-form-item label="时长(分钟)">
+            <el-input-number v-model="form.duration_minutes" :min="10" :max="300"></el-input-number>
+          </el-form-item>
+          <el-form-item label="总分">
+            <el-input-number v-model="form.total_score" :min="10" :max="500"></el-input-number>
+          </el-form-item>
+          <el-form-item label="分配班级">
+            <el-select v-model="form.class_id" placeholder="不选则全部班级" clearable>
+              <el-option v-for="c in classes" :key="c.id" :value="c.id" :label="c.name + ' (' + (c.grade||'') + ')'"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="发布状态">
+            <el-switch v-model="form.published" active-text="发布" inactive-text="不发布"></el-switch>
+          </el-form-item>
+          <el-form-item label="选题">
+            <el-transfer
+              v-model="form.question_ids"
+              :data="availableQ.map(q=>({key:q.id, label: q.id + '. [' + q.qtype + '] ' + q.stem.slice(0,30) + (q.stem.length>30?'...':'')}))"
+              :titles="['题库', '已选']"
+              filterable
+              target-order="push"
+              style="height: 400px;"
+            ></el-transfer>
+            <div class="text-sub small">已选 {{ form.question_ids.length }} 道题</div>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="editDialog = false">取消</el-button>
+          <el-button type="primary" @click="save">保存</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  `
+};
+
+// ============== 教师 - 学生管理 ==============
+const TeacherUsers = {
+  props: ['classes'],
+  emits: ['refresh'],
+  setup(props, { emit }) {
+    const list = ref([]);
+    const filters = reactive({ role: '', class_id: '', q: '' });
+    const editDialog = ref(false);
+    const form = ref(null);
+
+    const load = async () => {
+      const params = new URLSearchParams();
+      if (filters.role) params.set('role', filters.role);
+      if (filters.class_id) params.set('class_id', filters.class_id);
+      if (filters.q) params.set('q', filters.q);
+      list.value = await api.get('/api/users?' + params);
+    };
+    const isAdmin = computed(() => props.user?.role === 'admin');
+    const onRoleChange = () => {
+      // 切换角色时清空不相关字段
+      if (form.value.role !== 'student') {
+        form.value.class_id = null;
+        form.value.student_no = '';
+      }
+    };
+    const openNew = () => {
+      form.value = { role: 'student', class_id: null, student_no: '' };
+      editDialog.value = true;
+    };
+    const openEdit = (u) => {
+      form.value = { ...u, password: '' };
+      editDialog.value = true;
+    };
+    const save = async () => {
+      try {
+        if (form.value.id) {
+          await api.patch('/api/users/' + form.value.id, form.value);
+          toast('修改成功', 'success');
+        } else {
+          if (!form.value.password) { toast('新账号必须设置密码', 'warning'); return; }
+          await api.post('/api/users', form.value);
+          toast('创建成功', 'success');
+        }
+        editDialog.value = false; load(); emit('refresh');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    const del = async (u) => {
+      try { await confirm(`确定删除账号 ${u.username}？`); await api.del('/api/users/' + u.id); toast('已禁用', 'success'); load(); emit('refresh'); }
+      catch (e) {}
+    };
+    const resetPwd = async (u) => {
+      try { await confirm(`重置 ${u.username} 的密码为 123456？`); const r = await api.post('/api/users/' + u.id + '/reset-password', { password: '123456' }); toast('密码已重置为 ' + r.new_password, 'success'); }
+      catch (e) {}
+    };
+    onMounted(load);
+    return { list, filters, editDialog, form, openNew, openEdit, save, del, load, resetPwd, isAdmin, onRoleChange };
+  },
+  template: `
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <div class="left">学生/教师账号管理</div>
+          <el-button type="primary" @click="openNew"><el-icon><Plus /></el-icon>新增账号</el-button>
+        </div>
+        <div class="table-toolbar">
+          <el-radio-group v-model="filters.role" @change="load">
+            <el-radio-button value="">全部</el-radio-button>
+            <el-radio-button value="student">学生</el-radio-button>
+            <el-radio-button value="teacher">教师</el-radio-button>
+          </el-radio-group>
+          <el-select v-model="filters.class_id" placeholder="班级" clearable @change="load" style="width:160px">
+            <el-option v-for="c in classes" :key="c.id" :value="c.id" :label="c.name"></el-option>
+          </el-select>
+          <el-input v-model="filters.q" placeholder="搜索账号/姓名/学号" clearable @change="load"></el-input>
+        </div>
+        <el-table :data="list" stripe>
+          <el-table-column prop="username" label="账号" min-width="100"></el-table-column>
+          <el-table-column prop="name" label="姓名" min-width="100"></el-table-column>
+          <el-table-column label="角色" width="90">
+            <template #default="{row}">
+              <el-tag v-if="row.role==='admin'" type="danger">管理员</el-tag>
+              <el-tag v-else-if="row.role==='teacher'" type="warning">教师</el-tag>
+              <el-tag v-else>学生</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="class_name" label="班级" width="120">
+            <template #default="{row}">{{ row.class_name || '-' }}</template>
+          </el-table-column>
+          <el-table-column prop="student_no" label="学号" width="100"></el-table-column>
+          <el-table-column label="状态" width="80">
+            <template #default="{row}">
+              <el-tag :type="row.active ? 'success' : 'info'">{{ row.active ? '正常' : '已禁用' }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="created_at" label="创建时间" width="160"></el-table-column>
+          <el-table-column label="操作" width="220" fixed="right">
+            <template #default="{row}">
+              <el-button size="small" @click="openEdit(row)">编辑</el-button>
+              <el-button size="small" @click="resetPwd(row)">重置密码</el-button>
+              <el-button size="small" type="danger" @click="del(row)">禁用</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <el-dialog v-model="editDialog" :title="form?.id ? '编辑账号' : '新增账号'" width="500px">
+        <el-form v-if="form" label-width="90px">
+          <el-form-item label="账号" required>
+            <el-input v-model="form.username" :disabled="!!form.id"></el-input>
+          </el-form-item>
+          <el-form-item label="姓名">
+            <el-input v-model="form.name"></el-input>
+          </el-form-item>
+          <el-form-item label="角色" required>
+            <el-radio-group v-model="form.role" @change="onRoleChange" size="large">
+              <el-radio-button label="student" border>
+                <el-icon style="vertical-align: middle;"><User /></el-icon> 学生
+              </el-radio-button>
+              <el-radio-button label="teacher" border>
+                <el-icon style="vertical-align: middle;"><Avatar /></el-icon> 教师
+              </el-radio-button>
+              <el-radio-button v-if="isAdmin" label="admin" border>
+                <el-icon style="vertical-align: middle"><Setting /></el-icon> 管理员
+              </el-radio-button>
+            </el-radio-group>
+            <div v-if="!isAdmin && form.role === 'admin'" style="color: #f56c6c; font-size: 12px; margin-top: 4px;">
+              ⚠️ 只有管理员能创建管理员
+            </div>
+          </el-form-item>
+          <el-form-item label="班级" v-if="form.role==='student'">
+            <el-select v-model="form.class_id" placeholder="选择班级" clearable>
+              <el-option v-for="c in classes" :key="c.id" :value="c.id" :label="c.name"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="学号" v-if="form.role==='student'">
+            <el-input v-model="form.student_no"></el-input>
+          </el-form-item>
+          <el-form-item :label="form.id ? '新密码' : '密码'" v-if="!form.id || form.password">
+            <el-input v-model="form.password" type="password" show-password :placeholder="form.id?'留空则不修改':'至少 6 位'"></el-input>
+          </el-form-item>
+          <el-form-item label="状态" v-if="form.id">
+            <el-switch v-model="form.active" :active-value="1" :inactive-value="0"></el-switch>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="editDialog = false">取消</el-button>
+          <el-button type="primary" @click="save">保存</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  `
+};
+
+// ============== 教师 - 知识点 ==============
+const TeacherKp = {
+  props: ['kp'],
+  emits: ['refresh'],
+  setup(props, { emit }) {
+    const editDialog = ref(false);
+    const form = ref(null);
+    const openNew = () => { form.value = { category: '' }; editDialog.value = true; };
+    const openEdit = (k) => { form.value = { ...k }; editDialog.value = true; };
+    const save = async () => {
+      try {
+        if (form.value.id) { await api.patch('/api/knowledge/' + form.value.id, form.value); }
+        else { await api.post('/api/knowledge', form.value); }
+        toast('已保存', 'success'); editDialog.value = false; emit('refresh');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    const del = async (k) => {
+      try { await confirm('确定删除该知识点？'); await api.del('/api/knowledge/' + k.id); toast('已删除', 'success'); emit('refresh'); }
+      catch (e) {}
+    };
+    return { editDialog, form, openNew, openEdit, save, del };
+  },
+  template: `
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <div class="left">知识点管理 ({{ kp.length }})</div>
+          <el-button type="primary" @click="openNew"><el-icon><Plus /></el-icon>新增知识点</el-button>
+        </div>
+        <el-table :data="kp" stripe>
+          <el-table-column prop="code" label="编码" min-width="160"></el-table-column>
+          <el-table-column prop="name" label="名称" min-width="160"></el-table-column>
+          <el-table-column prop="category" label="分类" width="120"></el-table-column>
+          <el-table-column prop="description" label="说明" min-width="200" show-overflow-tooltip></el-table-column>
+          <el-table-column label="操作" width="160" fixed="right">
+            <template #default="{row}">
+              <el-button size="small" @click="openEdit(row)">编辑</el-button>
+              <el-button size="small" type="danger" @click="del(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <el-dialog v-model="editDialog" :title="form?.id ? '编辑知识点' : '新增知识点'" width="500px">
+        <el-form v-if="form" label-width="80px">
+          <el-form-item label="编码" required>
+            <el-input v-model="form.code" placeholder="如 KP_GRAMMAR_TENSE" :disabled="!!form.id"></el-input>
+          </el-form-item>
+          <el-form-item label="名称" required>
+            <el-input v-model="form.name"></el-input>
+          </el-form-item>
+          <el-form-item label="分类">
+            <el-input v-model="form.category" placeholder="如 语法/词汇/阅读"></el-input>
+          </el-form-item>
+          <el-form-item label="说明">
+            <el-input v-model="form.description" type="textarea" :rows="3"></el-input>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="editDialog = false">取消</el-button>
+          <el-button type="primary" @click="save">保存</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  `
+};
+
+// ============== 教师 - 成绩分析 ==============
+const TeacherStats = {
+  props: ['stats', 'classes'],
+  emits: ['refresh'],
+  setup(props) {
+    const detailDialog = ref(false);
+    const detail = ref(null);
+    const viewPaper = async (p) => {
+      detail.value = await api.get('/api/stats/paper/' + p.id);
+      detailDialog.value = true;
+    };
+    return { detailDialog, detail, viewPaper };
+  },
+  template: `
+    <div>
+      <div class="card">
+        <div class="card-title"><div class="left">学生成绩明细</div></div>
+        <el-table :data="stats.students || []" stripe>
+          <el-table-column prop="name" label="姓名" min-width="80"></el-table-column>
+          <el-table-column prop="username" label="账号" min-width="100"></el-table-column>
+          <el-table-column prop="class_name" label="班级" min-width="100"></el-table-column>
+          <el-table-column label="答题数" width="80">
+            <template #default="{row}">{{ row.total_q }}</template>
+          </el-table-column>
+          <el-table-column label="正确率" width="100">
+            <template #default="{row}">
+              <el-progress :percentage="Math.round((row.accuracy||0)*100)" :stroke-width="10"></el-progress>
+            </template>
+          </el-table-column>
+          <el-table-column label="练习次数" width="80">
+            <template #default="{row}">{{ row.attempts || 0 }}</template>
+          </el-table-column>
+          <el-table-column label="考试平均得分率" width="120">
+            <template #default="{row}">
+              <span :class="(row.avg_score_ratio||0) >= 0.6 ? 'text-success' : 'text-danger'">
+                {{ ((row.avg_score_ratio||0) * 100).toFixed(1) }}%
+              </span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="left">试卷成绩汇总</div></div>
+        <div v-if="(stats.paper_stats || []).length === 0" class="empty">暂无考试数据</div>
+        <el-table v-else :data="stats.paper_stats" stripe>
+          <el-table-column prop="name" label="试卷" min-width="180"></el-table-column>
+          <el-table-column prop="class_name" label="班级" width="120">
+            <template #default="{row}">{{ row.class_name || '全部' }}</template>
+          </el-table-column>
+          <el-table-column label="提交数" width="80">
+            <template #default="{row}">{{ row.submissions || 0 }}</template>
+          </el-table-column>
+          <el-table-column label="平均分" width="100">
+            <template #default="{row}">{{ row.avg_score ? row.avg_score.toFixed(1) : '-' }}</template>
+          </el-table-column>
+          <el-table-column label="最高分" width="100">
+            <template #default="{row}">{{ row.max_score ? row.max_score.toFixed(1) : '-' }}</template>
+          </el-table-column>
+          <el-table-column label="最低分" width="100">
+            <template #default="{row}">{{ row.min_score ? row.min_score.toFixed(1) : '-' }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="100" fixed="right">
+            <template #default="{row}">
+              <el-button size="small" type="primary" @click="viewPaper(row)">详情</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="left">全站知识点掌握情况（最弱 10 项优先）</div></div>
+        <el-table :data="(stats.kp_summary || []).slice(0, 20)" stripe>
+          <el-table-column prop="kp" label="知识点" min-width="200"></el-table-column>
+          <el-table-column label="答题数" width="100">
+            <template #default="{row}">{{ row.attempted }}</template>
+          </el-table-column>
+          <el-table-column label="答对数" width="100">
+            <template #default="{row}">{{ row.correct }}</template>
+          </el-table-column>
+          <el-table-column label="正确率" width="200">
+            <template #default="{row}">
+              <el-progress :percentage="Math.round((row.accuracy||0)*100)" :stroke-width="14" :status="row.accuracy > 0.7 ? 'success' : row.accuracy > 0.5 ? '' : 'exception'"></el-progress>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <el-dialog v-model="detailDialog" title="试卷详细分析" width="900px" top="5vh">
+        <div v-if="detail">
+          <div class="stat-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card primary"><div class="label">试卷</div><div class="value" style="font-size: 16px;">{{ detail.paper.name }}</div></div>
+            <div class="stat-card success"><div class="label">提交人数</div><div class="value">{{ detail.submissions.length }}</div></div>
+            <div class="stat-card warning"><div class="label">平均分</div><div class="value">{{ (detail.submissions.reduce((a,b)=>a+b.score_earned,0) / detail.submissions.length || 0).toFixed(1) }}</div></div>
+            <div class="stat-card info"><div class="label">总分</div><div class="value">{{ detail.paper.total_score }}</div></div>
+          </div>
+          <h4>成绩分布</h4>
+          <div class="flex gap-8 mb-16">
+            <el-tag v-for="(n, k) in detail.score_distribution" :key="k" size="large">{{ k }}分: {{ n }}人</el-tag>
+          </div>
+          <h4>每题正确率</h4>
+          <el-table :data="detail.q_stats" stripe max-height="300">
+            <el-table-column prop="stem" label="题目" min-width="300" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="qtype" label="题型" width="90"></el-table-column>
+            <el-table-column prop="score" label="分值" width="60"></el-table-column>
+            <el-table-column label="作答数" width="80">
+              <template #default="{row}">{{ row.attempts }}</template>
+            </el-table-column>
+            <el-table-column label="正确率" width="120">
+              <template #default="{row}">
+                <el-progress :percentage="Math.round((row.accuracy||0)*100)" :status="row.accuracy < 0.5 ? 'exception' : ''"></el-progress>
+              </template>
+            </el-table-column>
+          </el-table>
+          <h4 style="margin-top: 16px;">学生成绩单</h4>
+          <el-table :data="detail.submissions" stripe max-height="300">
+            <el-table-column prop="name" label="姓名" min-width="80"></el-table-column>
+            <el-table-column prop="username" label="账号" min-width="100"></el-table-column>
+            <el-table-column prop="class_name" label="班级" width="100"></el-table-column>
+            <el-table-column label="成绩" width="100">
+              <template #default="{row}"><strong>{{ row.score_earned.toFixed(1) }} / {{ row.max_score.toFixed(0) }}</strong></template>
+            </el-table-column>
+            <el-table-column label="得分率" width="100">
+              <template #default="{row}">{{ (row.ratio*100).toFixed(1) }}%</template>
+            </el-table-column>
+            <el-table-column prop="correct" label="正确题数" width="80"></el-table-column>
+            <el-table-column prop="submitted_at" label="提交时间" min-width="160"></el-table-column>
+          </el-table>
+        </div>
+      </el-dialog>
+    </div>
+  `
+};
+
+// ============== 班级管理（嵌在学生管理上方的快捷入口） ==============
+const TeacherClasses = {
+  props: ['classes'],
+  emits: ['refresh'],
+  setup(props, { emit }) {
+    const editDialog = ref(false);
+    const form = ref(null);
+    const openNew = () => { form.value = { grade: '初三' }; editDialog.value = true; };
+    const openEdit = (c) => { form.value = { ...c }; editDialog.value = true; };
+    const save = async () => {
+      try {
+        if (form.value.id) { await api.patch('/api/classes/' + form.value.id, form.value); }
+        else { await api.post('/api/classes', form.value); }
+        toast('已保存', 'success'); editDialog.value = false; emit('refresh');
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    const del = async (c) => {
+      try { await confirm('确定删除？该班级下若有学生则不能删除。'); await api.del('/api/classes/' + c.id); toast('已删除', 'success'); emit('refresh'); }
+      catch (e) { if (e.message) toast(e.message, 'error'); }
+    };
+    return { editDialog, form, openNew, openEdit, save, del };
+  },
+  template: `
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <div class="left">班级管理 ({{ classes.length }})</div>
+          <el-button type="primary" @click="openNew"><el-icon><Plus /></el-icon>新增班级</el-button>
+        </div>
+        <el-table :data="classes" stripe>
+          <el-table-column prop="name" label="班级名称" min-width="160"></el-table-column>
+          <el-table-column prop="grade" label="年级" width="120"></el-table-column>
+          <el-table-column label="学生数" width="100">
+            <template #default="{row}">{{ row.student_count }}</template>
+          </el-table-column>
+          <el-table-column prop="created_at" label="创建时间" width="180"></el-table-column>
+          <el-table-column label="操作" width="160" fixed="right">
+            <template #default="{row}">
+              <el-button size="small" @click="openEdit(row)">编辑</el-button>
+              <el-button size="small" type="danger" @click="del(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <el-dialog v-model="editDialog" :title="form?.id ? '编辑班级' : '新增班级'" width="400px">
+        <el-form v-if="form" label-width="80px">
+          <el-form-item label="名称" required>
+            <el-input v-model="form.name"></el-input>
+          </el-form-item>
+          <el-form-item label="年级">
+            <el-input v-model="form.grade"></el-input>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="editDialog = false">取消</el-button>
+          <el-button type="primary" @click="save">保存</el-button>
+        </template>
+      </el-dialog>
+    </div>
+  `
+};
+
+// ============== 主 App ==============
+const App = {
+  components: {
+    'login-page': LoginPage,
+    'student-home': StudentHome,
+    'student-practice': StudentPractice,
+    'student-exam': StudentExam,
+    'student-wrong': StudentWrong,
+    'student-report': StudentReport,
+    'student-history': StudentHistory,
+    'teacher-dash': TeacherDash,
+    'teacher-qbank': TeacherQbank,
+    'teacher-papers': TeacherPapers,
+    'teacher-users': TeacherUsers,
+    'teacher-kp': TeacherKp,
+    'teacher-stats': TeacherStats,
+    'teacher-classes': TeacherClasses,
+    'do-questions': DoQuestions
+  },
+  setup() {
+    const token = ref(localStorage.getItem('token') || '');
+    const user = ref(JSON.parse(localStorage.getItem('user') || '{}'));
+    const page = ref('');
+    const loginRole = ref('student');
+    const studentStats = ref({});
+    const teacherStats = ref({});
+    const classList = ref([]);
+    const kpList = ref([]);
+    const qtypeList = ref(['单选', '多选', '完形填空', '选词填空', '阅读理解', '翻译', '作文']);
+    const mobileSidebar = ref(false);
+
+    const isTeacher = computed(() => user.value?.role === 'teacher' || user.value?.role === 'admin');
+    const roleLabel = computed(() => ({admin:'管理员', teacher:'教师', student:'学生'})[user.value?.role] || '');
+
+    const onLogin = (u) => {
+      user.value = u;
+      token.value = localStorage.getItem('token');
+      // 根据角色进入
+      page.value = (u.role === 'student') ? 's-home' : 't-dash';
+      document.body.className = isTeacher.value ? 'teacher-mode' : '';
+      loadAll();
+    };
+
+    const onMenu = async (cmd) => {
+      if (cmd === 'logout') {
+        try { await api.post('/api/logout'); } catch (e) {}
+        localStorage.clear();
+        location.reload();
+      }
+    };
+
+    const go = (p) => { page.value = p; mobileSidebar.value = false; window.scrollTo(0, 0); };
+
+    const loadStudentStats = async () => { try { studentStats.value = await api.get('/api/stats/me'); } catch (e) {} };
+    const loadTeacherData = async () => {
+      try { teacherStats.value = await api.get('/api/stats/teacher'); } catch (e) {}
+      try { classList.value = await api.get('/api/classes'); } catch (e) {}
+      try { kpList.value = await api.get('/api/knowledge'); } catch (e) {}
+    };
+    const loadAll = async () => { if (isTeacher.value) await loadTeacherData(); else await loadStudentStats(); };
+
+    const onAttemptFinish = () => { loadAll(); };
+
+    onMounted(async () => {
+      if (!token.value) return;
+      try {
+        const me = await api.get('/api/me');
+        user.value = me;
+        document.body.className = isTeacher.value ? 'teacher-mode' : '';
+        page.value = isTeacher.value ? 't-dash' : 's-home';
+        loadAll();
+      } catch (e) {
+        localStorage.clear();
+        token.value = '';
+      }
+    });
+
+    watch(loginRole, () => { document.body.className = ''; });
+
+    return { token, user, page, loginRole, studentStats, teacherStats, classList, kpList, qtypeList, mobileSidebar, isTeacher, roleLabel, onLogin, onMenu, go, loadStudentStats, loadTeacherData, onAttemptFinish };
+  },
+  template: `
+    <login-page v-if="!token" :role="loginRole" @login="onLogin" @switch-role="loginRole = $event"></login-page>
+    <template v-else>
+      <div class="topbar">
+        <div class="logo">
+          <span class="mobile-menu-btn" @click="mobileSidebar = !mobileSidebar">
+            <el-icon><Menu /></el-icon>
+          </span>
+          <div class="logo-icon">{{ isTeacher ? 'T' : 'S' }}</div>
+          <span>{{ isTeacher ? '教师工作台' : '学生学习中心' }}</span>
+        </div>
+        <div class="user-info">
+          <span class="name">{{ user.name || user.username }}</span>
+          <span class="role-tag" :class="user.role">{{ roleLabel }}</span>
+          <span class="text-sub small" v-if="user.class_info">{{ user.class_info.name }}</span>
+          <el-dropdown @command="onMenu">
+            <el-avatar :size="32" style="background: linear-gradient(135deg, #4f7cff, #7c3aed);">
+              {{ (user.name || user.username).charAt(0) }}
+            </el-avatar>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="changePwd"><el-icon><Lock /></el-icon> 修改密码</el-dropdown-item>
+                <el-dropdown-item command="logout" divided><el-icon><SwitchButton /></el-icon> 退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </div>
+      <div class="main">
+        <div class="sidebar" :class="{'mobile-show': mobileSidebar}">
+          <template v-if="isTeacher">
+            <div class="menu-item" :class="{active: page==='t-dash'}" @click="go('t-dash')"><el-icon class="icon"><Odometer /></el-icon>数据看板</div>
+            <div class="menu-item" :class="{active: page==='t-qbank'}" @click="go('t-qbank')"><el-icon class="icon"><Files /></el-icon>题库管理</div>
+            <div class="menu-item" :class="{active: page==='t-papers'}" @click="go('t-papers')"><el-icon class="icon"><Document /></el-icon>试卷管理</div>
+            <div class="menu-item" :class="{active: page==='t-users'}" @click="go('t-users')"><el-icon class="icon"><User /></el-icon>学生管理</div>
+            <div class="menu-item" :class="{active: page==='t-kp'}" @click="go('t-kp')"><el-icon class="icon"><Collection /></el-icon>知识点</div>
+            <div class="menu-item" :class="{active: page==='t-stats'}" @click="go('t-stats')"><el-icon class="icon"><DataAnalysis /></el-icon>成绩分析</div>
+          </template>
+          <template v-else>
+            <div class="menu-item" :class="{active: page==='s-home'}" @click="go('s-home')"><el-icon class="icon"><HomeFilled /></el-icon>首页</div>
+            <div class="menu-item" :class="{active: page==='s-practice'}" @click="go('s-practice')"><el-icon class="icon"><EditPen /></el-icon>自由练习</div>
+            <div class="menu-item" :class="{active: page==='s-exam'}" @click="go('s-exam')"><el-icon class="icon"><Document /></el-icon>考试中心</div>
+            <div class="menu-item" :class="{active: page==='s-wrong'}" @click="go('s-wrong')"><el-icon class="icon"><Warning /></el-icon>错题本</div>
+            <div class="menu-item" :class="{active: page==='s-report'}" @click="go('s-report')"><el-icon class="icon"><TrendCharts /></el-icon>学习报告</div>
+            <div class="menu-item" :class="{active: page==='s-history'}" @click="go('s-history')"><el-icon class="icon"><Clock /></el-icon>历史记录</div>
+          </template>
+        </div>
+        <div class="content" @click="mobileSidebar = false">
+          <student-home v-if="page==='s-home'" :user="user" :stats="studentStats" @goto="go" @refresh="loadStudentStats"></student-home>
+          <student-practice v-if="page==='s-practice'" :qtypes="qtypeList" @result="onAttemptFinish"></student-practice>
+          <student-exam v-if="page==='s-exam'" @result="onAttemptFinish"></student-exam>
+          <student-wrong v-if="page==='s-wrong'"></student-wrong>
+          <student-report v-if="page==='s-report'" :stats="studentStats"></student-report>
+          <student-history v-if="page==='s-history'"></student-history>
+          <teacher-dash v-if="page==='t-dash'" :stats="teacherStats" @goto="go"></teacher-dash>
+          <teacher-qbank v-if="page==='t-qbank'" :kp="kpList" :qtypes="qtypeList" @refresh="loadTeacherData"></teacher-qbank>
+          <teacher-papers v-if="page==='t-papers'" :qtypes="qtypeList" :classes="classList" @refresh="loadTeacherData"></teacher-papers>
+          <teacher-users v-if="page==='t-users'" :classes="classList" @refresh="loadTeacherData"></teacher-users>
+          <teacher-kp v-if="page==='t-kp'" :kp="kpList" @refresh="loadTeacherData"></teacher-kp>
+          <teacher-stats v-if="page==='t-stats'" :stats="teacherStats"></teacher-stats>
+        </div>
+      </div>
+      <div class="mobile-tabbar">
+        <template v-if="isTeacher">
+          <div class="tab" :class="{active: page==='t-dash'}" @click="go('t-dash')"><el-icon class="ti"><Odometer /></el-icon><span>看板</span></div>
+          <div class="tab" :class="{active: page==='t-qbank'}" @click="go('t-qbank')"><el-icon class="ti"><Files /></el-icon><span>题库</span></div>
+          <div class="tab" :class="{active: page==='t-papers'}" @click="go('t-papers')"><el-icon class="ti"><Document /></el-icon><span>试卷</span></div>
+          <div class="tab" :class="{active: page==='t-users'}" @click="go('t-users')"><el-icon class="ti"><User /></el-icon><span>学生</span></div>
+          <div class="tab" :class="{active: page==='t-stats'}" @click="go('t-stats')"><el-icon class="ti"><DataAnalysis /></el-icon><span>分析</span></div>
+        </template>
+        <template v-else>
+          <div class="tab" :class="{active: page==='s-home'}" @click="go('s-home')"><el-icon class="ti"><HomeFilled /></el-icon><span>首页</span></div>
+          <div class="tab" :class="{active: page==='s-practice'}" @click="go('s-practice')"><el-icon class="ti"><EditPen /></el-icon><span>练习</span></div>
+          <div class="tab" :class="{active: page==='s-exam'}" @click="go('s-exam')"><el-icon class="ti"><Document /></el-icon><span>考试</span></div>
+          <div class="tab" :class="{active: page==='s-wrong'}" @click="go('s-wrong')"><el-icon class="ti"><Warning /></el-icon><span>错题</span></div>
+          <div class="tab" :class="{active: page==='s-report'}" @click="go('s-report')"><el-icon class="ti"><TrendCharts /></el-icon><span>报告</span></div>
+        </template>
+      </div>
+    </template>
+  `
+};
+
+const app = createApp(App);
+app.use(ElementPlus);
+for (const [k, v] of Object.entries(ElementPlusIconsVue)) app.component(k, v);
+app.mount('#app');
+</script>
+</body>
+</html>

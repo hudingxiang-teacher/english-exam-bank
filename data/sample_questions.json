@@ -1,0 +1,166 @@
+[
+  {
+    "qtype": "单选",
+    "stem": "She ___ to school every day.",
+    "options": [{"label": "A", "content": "go"}, {"label": "B", "content": "goes"}, {"label": "C", "content": "went"}, {"label": "D", "content": "going"}],
+    "answer": "B",
+    "kp": ["KP_GRAMMAR_TENSE"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 北京中考",
+    "year": 2023,
+    "analysis": "主语是第三人称单数,一般现在时用 goes。"
+  },
+  {
+    "qtype": "单选",
+    "stem": "I ___ my homework when the phone rang.",
+    "options": [{"label": "A", "content": "do"}, {"label": "B", "content": "did"}, {"label": "C", "content": "was doing"}, {"label": "D", "content": "am doing"}],
+    "answer": "C",
+    "kp": ["KP_GRAMMAR_TENSE"],
+    "difficulty": 3,
+    "score": 2,
+    "source": "2023 上海中考",
+    "year": 2023,
+    "analysis": "过去进行时表示过去某时正在进行的动作,被电话打断。"
+  },
+  {
+    "qtype": "单选",
+    "stem": "There ___ many trees in the park last year.",
+    "options": [{"label": "A", "content": "is"}, {"label": "B", "content": "are"}, {"label": "C", "content": "was"}, {"label": "D", "content": "were"}],
+    "answer": "D",
+    "kp": ["KP_GRAMMAR_THERE_BE"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 广州中考",
+    "year": 2023,
+    "analysis": "trees 是复数,过去时用 were。"
+  },
+  {
+    "qtype": "单选",
+    "stem": "___ a teacher, she is very patient with her students.",
+    "options": [{"label": "A", "content": "As"}, {"label": "B", "content": "Like"}, {"label": "C", "content": "For"}, {"label": "D", "content": "With"}],
+    "answer": "A",
+    "kp": ["KP_GRAMMAR_QUANTIFIER"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 北京中考",
+    "year": 2023
+  },
+  {
+    "qtype": "单选",
+    "stem": "The man ___ is wearing a blue shirt is my uncle.",
+    "options": [{"label": "A", "content": "who"}, {"label": "B", "content": "which"}, {"label": "C", "content": "whose"}, {"label": "D", "content": "whom"}],
+    "answer": "A",
+    "kp": ["KP_GRAMMAR_CLAUSE_RELATIVE"],
+    "difficulty": 3,
+    "score": 2,
+    "source": "2023 上海中考",
+    "year": 2023,
+    "analysis": "先行词是人,用 who。"
+  },
+  {
+    "qtype": "单选",
+    "stem": "If it ___ tomorrow, we will stay at home.",
+    "options": [{"label": "A", "content": "rains"}, {"label": "B", "content": "rained"}, {"label": "C", "content": "will rain"}, {"label": "D", "content": "is raining"}],
+    "answer": "A",
+    "kp": ["KP_GRAMMAR_SUBJUNCTIVE"],
+    "difficulty": 3,
+    "score": 2,
+    "source": "2023 广州中考",
+    "year": 2023
+  },
+  {
+    "qtype": "单选",
+    "stem": "___ exciting news!",
+    "options": [{"label": "A", "content": "What"}, {"label": "B", "content": "What an"}, {"label": "C", "content": "How"}, {"label": "D", "content": "How an"}],
+    "answer": "A",
+    "kp": ["KP_GRAMMAR_ARTICLE"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 北京中考",
+    "year": 2023
+  },
+  {
+    "qtype": "多选",
+    "stem": "Which of the following are fruits? (多选)",
+    "options": [{"label": "A", "content": "apple"}, {"label": "B", "content": "banana"}, {"label": "C", "content": "carrot"}, {"label": "D", "content": "orange"}],
+    "answer": "A,B,D",
+    "kp": ["KP_VOCAB_NOUN"],
+    "difficulty": 1,
+    "score": 3,
+    "source": "2023 上海中考",
+    "year": 2023
+  },
+  {
+    "qtype": "多选",
+    "stem": "Choose the correct verbs: (多选)",
+    "options": [{"label": "A", "content": "go"}, {"label": "B", "content": "run"}, {"label": "C", "content": "beautiful"}, {"label": "D", "content": "sing"}],
+    "answer": "A,B,D",
+    "kp": ["KP_VOCAB_VERB"],
+    "difficulty": 1,
+    "score": 3
+  },
+  {
+    "qtype": "完形填空",
+    "stem": "Tom ___ up at 7 o'clock every morning.",
+    "options": [{"label": "A", "content": "get"}, {"label": "B", "content": "gets"}, {"label": "C", "content": "got"}, {"label": "D", "content": "getting"}],
+    "answer": "B",
+    "kp": ["KP_GRAMMAR_TENSE"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 广州中考",
+    "year": 2023
+  },
+  {
+    "qtype": "完形填空",
+    "stem": "She is good ___ playing the piano.",
+    "options": [{"label": "A", "content": "in"}, {"label": "B", "content": "at"}, {"label": "C", "content": "on"}, {"label": "D", "content": "with"}],
+    "answer": "B",
+    "kp": ["KP_VOCAB_PHRASE"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 北京中考",
+    "year": 2023,
+    "analysis": "be good at 擅长"
+  },
+  {
+    "qtype": "选词填空",
+    "stem": "用所给词的适当形式填空:\nTom ___ (go) to school by bus yesterday.",
+    "options": [],
+    "answer": "went",
+    "kp": ["KP_GRAMMAR_TENSE"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 上海中考",
+    "year": 2023
+  },
+  {
+    "qtype": "阅读理解",
+    "stem": "阅读下面短文,选择正确答案:\n\nTom is a 12-year-old boy. He likes reading books. Every weekend, he goes to the library with his sister. They read for two hours there.\n\nQuestion: How often does Tom go to the library?",
+    "options": [{"label": "A", "content": "Every day"}, {"label": "B", "content": "Every week"}, {"label": "C", "content": "Every month"}, {"label": "D", "content": "Every year"}],
+    "answer": "B",
+    "kp": ["KP_READING_DETAIL"],
+    "difficulty": 2,
+    "score": 2,
+    "source": "2023 广州中考",
+    "year": 2023
+  },
+  {
+    "qtype": "翻译",
+    "stem": "Translate: 我每天步行去上学。",
+    "options": [],
+    "answer": "I walk to school every day.",
+    "kp": ["KP_TRANSLATION"],
+    "difficulty": 3,
+    "score": 5
+  },
+  {
+    "qtype": "作文",
+    "stem": "Write a short passage (50-80 words) about your best friend. Include: name, age, hobby, why he/she is your best friend.",
+    "options": [],
+    "answer": "示例:My best friend is Li Ming. He is 13 years old. He likes playing basketball and reading books. He is my best friend because he is kind and always helps me with my homework.",
+    "kp": ["KP_WRITING"],
+    "difficulty": 5,
+    "score": 15
+  }
+]

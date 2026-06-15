@@ -1,0 +1,4 @@
+flask>=2.3,<3.1
+openpyxl>=3.1,<4
+gunicorn>=21.2,<24
+psycopg2-binary>=2.9,<3  # 仅云端部署（PostgreSQL）时需要
